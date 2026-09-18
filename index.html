@@ -1,0 +1,3326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>人生升级系统：山海神魔与全维战役版</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Three.js 3D 引擎 CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <style>
+    :root {
+      --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+
+    /* 深色主题 (深邃黑曜星幕) */
+    body.theme-dark {
+      --bg-page: #07090e;
+      --bg-panel: rgba(18, 24, 38, 0.75);
+      --bg-panel-solid: #111726;
+      --bg-inner: rgba(10, 14, 23, 0.65);
+      --bg-input: #0b0f19;
+      --border-main: rgba(255, 255, 255, 0.07);
+      --border-accent: rgba(168, 85, 247, 0.35);
+      --text-title: #f8fafc;
+      --text-body: #94a3b8;
+      --text-muted: #64748b;
+      --text-subtle: #475569;
+      --nav-bg: rgba(11, 15, 25, 0.88);
+      --card-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.5);
+      --gantt-bg: #0b0f19;
+      --gantt-header-bg: #111726;
+    }
+
+    /* 浅色主题 (高对比度纯净象牙白) */
+    body.theme-light {
+      --bg-page: #f6f8fb;
+      --bg-panel: rgba(255, 255, 255, 0.92);
+      --bg-panel-solid: #ffffff;
+      --bg-inner: #f1f4f9;
+      --bg-input: #ffffff;
+      --border-main: rgba(226, 232, 240, 0.9);
+      --border-accent: rgba(147, 51, 234, 0.3);
+      --text-title: #0f172a;
+      --text-body: #334155;
+      --text-muted: #64748b;
+      --text-subtle: #94a3b8;
+      --nav-bg: rgba(255, 255, 255, 0.94);
+      --card-shadow: 0 10px 30px -8px rgba(15, 23, 42, 0.06);
+      --gantt-bg: #ffffff;
+      --gantt-header-bg: #f8fafc;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-page);
+      color: var(--text-body);
+      transition: background-color 0.25s ease, color 0.25s ease;
+      -webkit-tap-highlight-color: transparent;
+      letter-spacing: -0.01em;
+    }
+
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-main);
+      box-shadow: var(--card-shadow);
+    }
+
+    .glass-inner {
+      background: var(--bg-inner);
+      border: 1px solid var(--border-main);
+    }
+
+    .ui-input {
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-main);
+      color: var(--text-title);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .ui-input:focus {
+      border-color: #a855f7;
+      box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+      outline: none;
+    }
+    .ui-input::placeholder {
+      color: var(--text-subtle);
+    }
+
+    .text-main-title { color: var(--text-title); }
+    .text-main-body { color: var(--text-body); }
+    .text-main-muted { color: var(--text-muted); }
+    .text-main-subtle { color: var(--text-subtle); }
+
+    /* 平滑极细滚动条 */
+    .gantt-scroll::-webkit-scrollbar { height: 5px; }
+    .gantt-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.03); border-radius: 9999px; }
+    .gantt-scroll::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.3); border-radius: 9999px; }
+    .gantt-scroll::-webkit-scrollbar-thumb:hover { background: rgba(168, 85, 247, 0.6); }
+
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+
+<body class="theme-dark min-h-screen pb-32 selection:bg-purple-500/20">
+
+  <!-- 顶部状态栏 -->
+  <header class="sticky top-0 z-40 w-full px-4 sm:px-6 py-3 glass-panel border-b border-black/5 dark:border-white/5 transition-all">
+    <div class="max-w-xl mx-auto flex justify-between items-center">
+      
+      <!-- 角色等级与山海境界代号 -->
+      <div class="flex items-center gap-2.5">
+        <div id="top-level-badge" class="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 shadow-md flex items-center justify-center text-white font-black text-sm italic shadow-purple-500/20">
+          1
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <h1 id="top-player-name" class="text-xs font-black text-main-title tracking-tight leading-none">星界使者</h1>
+            <span id="top-title-tag" class="text-[8px] font-black px-1.5 py-0.2 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">破壳幼境</span>
+          </div>
+          <p id="top-exp-label" class="text-[9px] text-main-muted font-mono mt-0.5 font-bold">EXP 0 / 100</p>
+        </div>
+      </div>
+
+      <!-- 潜能点数与功能开关 -->
+      <div class="flex items-center gap-1.5">
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
+          <span class="text-amber-500 text-xs">💎</span>
+          <span id="top-points-display" class="text-xs font-black text-amber-600 dark:text-amber-400 font-mono">0</span>
+        </div>
+
+        <button onclick="toggleTheme()" class="p-2 rounded-xl glass-inner hover:scale-105 active:scale-95 transition-all text-xs" title="切换昼夜外观">
+          <span id="theme-toggle-icon">🌙</span>
+        </button>
+
+        <button onclick="toggleModal('settings-modal')" class="p-2 rounded-xl glass-inner hover:scale-105 active:scale-95 transition-all text-xs" title="系统设置">
+          ⚙️
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="max-w-xl mx-auto px-4 pt-3.5 space-y-3.5">
+    
+    <!-- 1. 时间刻度微卡 (今日已过 / 本年已过 / 人生进度) -->
+    <section class="glass-panel rounded-2xl p-3 space-y-2">
+      <div class="flex justify-between items-center text-[9px] font-black text-main-muted uppercase tracking-wider px-1">
+        <span class="flex items-center gap-1"><span>⏳</span> 时间流逝与人生进度</span>
+        <span id="time-now-label" class="font-mono text-purple-600 dark:text-purple-400 font-bold">时光刻度</span>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2">
+        <div class="p-2 rounded-xl glass-inner flex flex-col gap-1">
+          <div class="flex justify-between text-[8px] font-black">
+            <span class="text-main-muted">今日已过</span>
+            <span id="time-day-pct" class="font-mono text-blue-600 dark:text-blue-400 font-bold">0%</span>
+          </div>
+          <div class="h-1.5 w-full bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
+            <div id="time-day-bar" class="h-full bg-blue-500 rounded-full transition-all duration-700" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <div class="p-2 rounded-xl glass-inner flex flex-col gap-1">
+          <div class="flex justify-between text-[8px] font-black">
+            <span class="text-main-muted">本年已过</span>
+            <span id="time-year-pct" class="font-mono text-purple-600 dark:text-purple-400 font-bold">0%</span>
+          </div>
+          <div class="h-1.5 w-full bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
+            <div id="time-year-bar" class="h-full bg-purple-500 rounded-full transition-all duration-700" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <div class="p-2 rounded-xl glass-inner flex flex-col gap-1">
+          <div class="flex justify-between text-[8px] font-black">
+            <span class="text-main-muted">人生进度</span>
+            <span id="time-life-pct" class="font-mono text-orange-600 dark:text-orange-400 font-bold">0%</span>
+          </div>
+          <div class="h-1.5 w-full bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
+            <div id="time-life-bar" class="h-full bg-orange-500 rounded-full transition-all duration-700" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 动态视图挂载区 -->
+    <div id="view-container" class="space-y-3.5"></div>
+
+  </main>
+
+  <!-- 底部轻量毛玻璃导航 -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 p-3 pointer-events-none">
+    <div class="max-w-md mx-auto p-1.5 rounded-[2rem] glass-panel border border-black/10 dark:border-white/10 flex justify-around items-center pointer-events-auto shadow-2xl" style="background: var(--nav-bg);">
+      <button onclick="switchTab('home')" id="tab-btn-home" class="relative py-2 px-3 rounded-2xl flex flex-col items-center gap-0.5 transition-all text-purple-600 dark:text-purple-400 font-black scale-105">
+        <span class="text-base sm:text-lg">🏠</span>
+        <span class="text-[8px] tracking-tight">掌控主页</span>
+      </button>
+
+      <button onclick="switchTab('battle')" id="tab-btn-battle" class="relative py-2 px-3 rounded-2xl flex flex-col items-center gap-0.5 transition-all text-main-subtle">
+        <span class="text-base sm:text-lg">🗺️</span>
+        <span class="text-[8px] tracking-tight font-bold">山海征途</span>
+        <span id="nav-battle-badge" class="hidden absolute top-0.5 right-1 px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[7px] font-black font-mono animate-pulse shadow pointer-events-none z-10">0</span>
+      </button>
+
+      <button onclick="switchTab('okr')" id="tab-btn-okr" class="relative py-2 px-3 rounded-2xl flex flex-col items-center gap-0.5 transition-all text-main-subtle">
+        <span class="text-base sm:text-lg">🎯</span>
+        <span class="text-[8px] tracking-tight">宏愿战役</span>
+      </button>
+
+      <button onclick="switchTab('character')" id="tab-btn-character" class="relative py-2 px-3 rounded-2xl flex flex-col items-center gap-0.5 transition-all text-main-subtle">
+        <span class="text-base sm:text-lg">🐉</span>
+        <span class="text-[8px] tracking-tight">元神行囊</span>
+      </button>
+
+      <button onclick="switchTab('treasury')" id="tab-btn-treasury" class="relative py-2 px-3 rounded-2xl flex flex-col items-center gap-0.5 transition-all text-main-subtle">
+        <span class="text-base sm:text-lg">🛍️</span>
+        <span class="text-[8px] tracking-tight">欲望宝阁</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- 弹窗 1：确立新目标 (OKR) -->
+  <div id="create-okr-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md hidden p-4 overflow-y-auto">
+    <div class="w-full max-w-md glass-panel rounded-[2rem] p-5 space-y-4 my-auto max-h-[90vh] overflow-y-auto scrollbar-hide border border-purple-500/30">
+      <div class="flex justify-between items-center pb-2 border-b border-black/5 dark:border-white/10">
+        <div>
+          <span class="text-[8px] font-black uppercase tracking-widest text-purple-600 dark:text-purple-400">OKR Planning</span>
+          <h3 class="text-xs font-black text-main-title flex items-center gap-1.5"><span>🎯</span> 新建目标战役</h3>
+        </div>
+        <button onclick="toggleModal('create-okr-modal')" class="text-main-muted hover:text-main-title p-1 text-sm font-bold">✕</button>
+      </div>
+
+      <div class="space-y-3">
+        <!-- 1. 目标 -->
+        <div>
+          <label class="text-[9px] font-black text-main-muted uppercase tracking-wider block mb-1">① 目标 (Objective)</label>
+          <input type="text" id="new-okr-title" placeholder="如：构建高可用调度引擎与示范运行体系" class="w-full ui-input rounded-xl p-2.5 text-xs outline-none font-bold">
+        </div>
+
+        <!-- 2. 时间周期 -->
+        <div class="p-3 rounded-2xl glass-inner space-y-2 border border-blue-500/20">
+          <div class="flex justify-between items-center">
+            <label class="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider">② 计划起止工期</label>
+            <span class="text-[8px] text-main-subtle">点击快捷填充</span>
+          </div>
+
+          <div class="flex flex-wrap gap-1.5">
+            <button type="button" onclick="applyCyclePreset(90, '季度攻坚 (W1-W12)')" class="px-2 py-0.5 rounded-lg glass-inner hover:border-purple-500/50 text-[8px] font-bold text-main-muted active:scale-95">季度 (12周)</button>
+            <button type="button" onclick="applyCyclePreset(30, '月度冲刺 (30天)')" class="px-2 py-0.5 rounded-lg glass-inner hover:border-purple-500/50 text-[8px] font-bold text-main-muted active:scale-95">月度 (30天)</button>
+            <button type="button" onclick="applyCyclePreset(100, '百日会战 (100天)')" class="px-2 py-0.5 rounded-lg glass-inner hover:border-purple-500/50 text-[8px] font-bold text-main-muted active:scale-95">百日 (100天)</button>
+            <button type="button" onclick="applyCyclePreset(14, '双周突击 (14天)')" class="px-2 py-0.5 rounded-lg glass-inner hover:border-purple-500/50 text-[8px] font-bold text-main-muted active:scale-95">双周 (14天)</button>
+          </div>
+
+          <div>
+            <span class="text-[8px] text-main-muted block mb-0.5 font-bold">周期标签</span>
+            <input type="text" id="new-okr-quarter" placeholder="如：2026 Q3 (W1-W12)" class="w-full ui-input rounded-lg p-1.5 text-[10px] outline-none font-mono">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <span class="text-[8px] text-main-muted block mb-0.5 font-bold">开始日期</span>
+              <input type="date" id="new-okr-start" class="w-full ui-input rounded-lg p-1.5 text-[10px] outline-none font-mono">
+            </div>
+            <div>
+              <span class="text-[8px] text-main-muted block mb-0.5 font-bold">截止日期</span>
+              <input type="date" id="new-okr-end" class="w-full ui-input rounded-lg p-1.5 text-[10px] outline-none font-mono">
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. 关键标尺 -->
+        <div class="space-y-2 pt-0.5">
+          <div class="flex justify-between items-center">
+            <label class="text-[9px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-wider">③ 关键结果 (Key Results)</label>
+            <button type="button" onclick="addKrRowInModal()" class="px-2 py-0.5 bg-purple-600 text-white rounded-lg text-[8px] font-black active:scale-95 transition-all">
+              + 增加新标尺
+            </button>
+          </div>
+          <div id="modal-kr-rows-container" class="space-y-2 max-h-48 overflow-y-auto scrollbar-hide pr-0.5"></div>
+        </div>
+
+        <!-- 4. 关联山海魔神 (趣味映射) -->
+        <div class="p-2.5 rounded-xl glass-inner space-y-1.5 border border-purple-500/20">
+          <div class="flex justify-between items-center">
+            <label class="text-[9px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-wider">④ 关联山海魔神 (挑战首领)</label>
+            <button onclick="randomizeShanhaiBoss()" type="button" class="px-2 py-0.5 rounded-lg bg-purple-600/10 hover:bg-purple-600/20 text-purple-600 dark:text-purple-300 text-[8px] font-bold border border-purple-500/30 active:scale-95 transition-all">
+              <span>🎲</span> 随机抽取
+            </button>
+          </div>
+          <div class="grid grid-cols-4 gap-2">
+            <input type="text" id="new-okr-boss-name" placeholder="如：混沌·浑敦无面" class="col-span-3 ui-input rounded-lg p-1.5 text-xs outline-none font-bold">
+            <input type="text" id="new-okr-boss-icon" value="👹" class="ui-input rounded-lg p-1.5 text-center text-sm outline-none">
+          </div>
+          <p id="new-okr-boss-lore" class="text-[8px] text-main-subtle italic">作为当前目标的实体强敌，推进任务可对其造成破盾伤害</p>
+        </div>
+      </div>
+
+      <button onclick="submitCreateOkr()" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs rounded-xl shadow-lg active:scale-95 transition-all">
+        确立并生成战役
+      </button>
+    </div>
+  </div>
+  <!-- 弹窗 4：任务阶段复盘 -->
+  <div id="task-retro-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md hidden p-4">
+    <div class="w-full max-w-sm glass-panel border border-purple-500/40 rounded-[2rem] p-5 space-y-3 max-h-[90vh] overflow-y-auto scrollbar-hide">
+      <div class="flex justify-between items-center pb-1.5 border-b border-black/5 dark:border-white/10">
+        <div>
+          <span class="text-[8px] font-black uppercase text-purple-600 dark:text-purple-400">Task Review</span>
+          <h3 class="text-xs font-black text-main-title flex items-center gap-1"><span>📜</span> 成果记录与复盘</h3>
+        </div>
+        <button onclick="toggleModal('task-retro-modal')" class="text-main-muted hover:text-main-title p-1 text-sm font-bold">✕</button>
+      </div>
+
+      <input type="hidden" id="retro-boss-id">
+      <input type="hidden" id="retro-kr-id">
+      <input type="hidden" id="retro-task-id">
+      <input type="hidden" id="retro-is-already-done">
+
+      <div class="flex justify-between items-center">
+        <h4 id="retro-task-name-display" class="text-xs font-black text-purple-600 dark:text-purple-400 font-mono truncate max-w-[200px]">任务名称</h4>
+        <button onclick="quickFlashCheck()" type="button" class="px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/30 text-[8px] font-black active:scale-95">
+          ⚡ 极速打卡
+        </button>
+      </div>
+
+      <div class="space-y-2">
+        <div>
+          <label class="text-[8px] font-black text-main-muted uppercase tracking-wider block mb-1">1. 产出成果记录</label>
+          <textarea id="retro-deliverable" placeholder="记下交付物：跑通单测、文档定稿、接口上线..." class="w-full ui-input rounded-xl p-2 text-[10px] min-h-[45px] outline-none"></textarea>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-[8px] font-black text-main-muted uppercase tracking-wider">2. 复盘与归因标签</label>
+            <span class="text-[7px] text-purple-500">点击快捷填入</span>
+          </div>
+          <div class="flex flex-wrap gap-1 mb-1">
+            <button type="button" onclick="insertRetroTag('技术突破')" class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-300 text-[8px] font-bold border border-purple-500/20">+ 技术突破</button>
+            <button type="button" onclick="insertRetroTag('外部依赖卡点')" class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-300 text-[8px] font-bold border border-purple-500/20">+ 外部卡点</button>
+            <button type="button" onclick="insertRetroTag('深度专注心流')" class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-300 text-[8px] font-bold border border-purple-500/20">+ 专注心流</button>
+            <button type="button" onclick="insertRetroTag('工期预估乐观')" class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-300 text-[8px] font-bold border border-purple-500/20">+ 预估乐观</button>
+          </div>
+          <textarea id="retro-insights" placeholder="心得或待改进点..." class="w-full ui-input rounded-xl p-2 text-[10px] min-h-[40px] outline-none"></textarea>
+        </div>
+
+        <div class="p-2.5 rounded-xl glass-inner border border-purple-500/20 space-y-1.5">
+          <label class="text-[8px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-wider block">3. 结论与下一步</label>
+          <div class="space-y-1">
+            <label class="flex items-center gap-1.5 cursor-pointer text-[9px] font-bold text-main-title">
+              <input type="radio" name="retro-next-choice" value="spawn" checked onchange="toggleNextActionInput(true)" class="accent-purple-600">
+              <span>🚀 安排下一步行动</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer text-[9px] font-bold text-main-title">
+              <input type="radio" name="retro-next-choice" value="done" onchange="toggleNextActionInput(false)" class="accent-purple-600">
+              <span>✅ 本任务完成归档</span>
+            </label>
+          </div>
+
+          <div id="retro-next-input-box" class="pt-1 space-y-1.5">
+            <input type="text" id="retro-next-action-text" placeholder="输入下一步行动..." class="w-full ui-input rounded-lg p-1.5 text-[9px] outline-none font-bold">
+            <div class="grid grid-cols-2 gap-1.5">
+              <input type="date" id="retro-next-start-date" class="w-full ui-input rounded-lg p-1 text-[8px] outline-none font-mono">
+              <input type="date" id="retro-next-end-date" class="w-full ui-input rounded-lg p-1 text-[8px] outline-none font-mono">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="submitTaskRetro()" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-xs rounded-xl shadow active:scale-95 transition-all">
+        完成记录 · 推进进度
+      </button>
+    </div>
+  </div>
+
+  <!-- 弹窗 3：编辑与校准 KR -->
+  <div id="edit-kr-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md hidden p-4">
+    <div class="w-full max-w-sm glass-panel border border-purple-500/40 rounded-[2rem] p-5 space-y-3">
+      <div class="flex justify-between items-center pb-1.5 border-b border-black/5 dark:border-white/10">
+        <div>
+          <span class="text-[8px] font-black uppercase text-purple-600 dark:text-purple-400">Key Result Calibration</span>
+          <h3 class="text-xs font-black text-main-title flex items-center gap-1"><span>🛠️</span> 标尺配置与工期校准</h3>
+        </div>
+        <button onclick="toggleModal('edit-kr-modal')" class="text-main-muted hover:text-main-title p-1 text-sm font-bold">✕</button>
+      </div>
+
+      <input type="hidden" id="edit-kr-boss-id">
+      <input type="hidden" id="edit-kr-id">
+
+      <div class="space-y-2.5">
+        <div>
+          <label class="text-[8px] font-black text-main-muted uppercase tracking-wider block mb-1">标尺目标描述</label>
+          <input type="text" id="edit-kr-text" class="w-full ui-input rounded-xl p-2 text-xs outline-none font-bold">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[8px] font-black text-main-muted uppercase tracking-wider block mb-1">关联属性维度</label>
+            <select id="edit-kr-stat" class="w-full ui-input rounded-xl p-1.5 text-xs outline-none font-bold">
+              <option value="none">🏢 纯净业务 (不挂钩)</option>
+              <option value="cognition">智识 🧠</option>
+              <option value="discipline">律令 ⚡</option>
+              <option value="vitality">体魄 🔥</option>
+              <option value="capital">财资 💎</option>
+              <option value="bond">联结 🤝</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[8px] font-black text-main-muted uppercase tracking-wider block mb-1">手动校准达成度</label>
+            <div class="flex items-center gap-1">
+              <input type="number" id="edit-kr-progress" min="0" max="100" class="w-full ui-input rounded-xl p-1.5 text-xs font-mono font-bold">
+              <span class="text-xs font-mono font-black text-purple-600 dark:text-purple-400">%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-2.5 rounded-xl glass-inner border border-purple-500/20 space-y-1.5">
+          <span class="text-[8px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-wider block">⏱️ 标尺起止日期</span>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <span class="text-[8px] text-main-muted block font-bold">起算日期</span>
+              <input type="date" id="edit-kr-start" class="w-full ui-input rounded-lg p-1.5 text-[9px] outline-none font-mono">
+            </div>
+            <div>
+              <span class="text-[8px] text-main-muted block font-bold">承诺截止</span>
+              <input type="date" id="edit-kr-end" class="w-full ui-input rounded-lg p-1.5 text-[9px] outline-none font-mono">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-1.5 pt-1">
+        <button onclick="submitEditKr()" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-xs rounded-xl shadow active:scale-95 transition-all">
+          保存标尺校准
+        </button>
+        <button onclick="deleteKrFromBoss()" class="w-full py-1.5 glass-inner text-red-500 hover:text-red-400 font-bold text-[9px] rounded-xl active:scale-95 transition-all">
+          废弃并删除该标尺
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 弹窗 4：任务阶段复盘与传送至讨伐前线 -->
+  <div id="task-retro-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md hidden p-4">
+    <div class="w-full max-w-sm glass-panel border border-purple-500/40 rounded-[2rem] p-5 space-y-3 max-h-[90vh] overflow-y-auto scrollbar-hide">
+      <div class="flex justify-between items-center pb-1.5 border-b border-black/5 dark:border-white/10">
+        <div>
+          <span class="text-[8px] font-black uppercase text-purple-600 dark:text-purple-400">Milestone Review</span>
+          <h3 class="text-xs font-black text-main-title flex items-center gap-1"><span>📜</span> 成果存证与行动复盘</h3>
+        </div>
+        <button onclick="toggleModal('task-retro-modal')" class="text-main-muted hover:text-main-title p-1 text-sm font-bold">✕</button>
+      </div>
+
+      <input type="hidden" id="retro-boss-id">
+      <input type="hidden" id="retro-kr-id">
+      <input type="hidden" id="retro-task-id">
+      <input type="hidden" id="retro-is-already-done">
+
+      <div class="flex justify-between items-center">
+        <h4 id="retro-task-name-display" class="text-xs font-black text-purple-600 dark:text-purple-400 font-mono truncate max-w-[200px]">任务名称</h4>
+        <button onclick="quickFlashCheck()" type="button" class="px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/30 text-[8px] font-black active:scale-95">
+          ⚡ 极速印记
+        </button>
+      </div>
+
+      <div class="space-y-2">
+        <div>
+          <label class="text-[8px] font-black text-main-muted uppercase tracking-wider block mb-1">1. 产出成果凭据 (Proof of Work)</label>
+          <textarea id="retro-deliverable" placeholder="记下具体交付物：跑通全部单测、完成文档定稿、联调接口正常..." class="w-full ui-input rounded-xl p-2 text-[10px] min-h-[45px] outline-none"></textarea>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-[8px] font-black text-main-muted uppercase tracking-wider">2. 核心复盘归因标签</label>
+            <span class="text-[7px] text-purple-500">点击快捷填入</span>
+          </div>
+          <div class="flex flex-wrap gap-1 mb-1">
+            <button type="button" onclick="insertRetroTag('技术盲区突破')" class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-300 text-[8px] font-bold border border-purple-500/20">+ 盲区突破</button>
+            <button type="button" onclick="insertRetroTag('外部依赖卡点')" class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-300 text-[8px] font-bold border border-purple-500/20">+ 依赖卡点</button>
+            <button type="button" onclick="insertRetroTag('深度专注心流')" class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-300 text-[8px] font-bold border border-purple-500/20">+ 专注心流</button>
+            <button type="button" onclick="insertRetroTag('工期估算乐观')" class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-300 text-[8px] font-bold border border-purple-500/20">+ 估时乐观</button>
+          </div>
+          <textarea id="retro-insights" placeholder="战术思考或复盘归因..." class="w-full ui-input rounded-xl p-2 text-[10px] min-h-[40px] outline-none"></textarea>
+        </div>
+
+        <div class="p-2.5 rounded-xl glass-inner border border-purple-500/20 space-y-1.5">
+          <label class="text-[8px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-wider block">3. 结论与下一步战术</label>
+          <div class="space-y-1">
+            <label class="flex items-center gap-1.5 cursor-pointer text-[9px] font-bold text-main-title">
+              <input type="radio" name="retro-next-choice" value="spawn" checked onchange="toggleNextActionInput(true)" class="accent-purple-600">
+              <span>🚀 产出新的下一步行动 (持续向前推进)</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer text-[9px] font-bold text-main-title">
+              <input type="radio" name="retro-next-choice" value="done" onchange="toggleNextActionInput(false)" class="accent-purple-600">
+              <span>✅ 本阶段圆满达成 (闭环归档)</span>
+            </label>
+          </div>
+
+          <div id="retro-next-input-box" class="pt-1 space-y-1.5">
+            <input type="text" id="retro-next-action-text" placeholder="输入下一步行动..." class="w-full ui-input rounded-lg p-1.5 text-[9px] outline-none font-bold">
+            <div class="grid grid-cols-2 gap-1.5">
+              <input type="date" id="retro-next-start-date" class="w-full ui-input rounded-lg p-1 text-[8px] outline-none font-mono">
+              <input type="date" id="retro-next-end-date" class="w-full ui-input rounded-lg p-1 text-[8px] outline-none font-mono">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="submitTaskRetro()" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-xs rounded-xl shadow active:scale-95 transition-all">
+        存证归档 · 传送至讨伐前线
+      </button>
+    </div>
+  </div>
+
+  <!-- 弹窗 5：战役归档确认弹窗 -->
+  <div id="archive-confirm-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4">
+    <div class="w-full max-w-xs glass-panel border border-amber-500/40 rounded-[2rem] p-5 text-center space-y-3">
+      <div class="text-3xl">📦</div>
+      <div>
+        <h4 class="text-xs font-black text-main-title">确定归档该攻坚战役？</h4>
+        <p class="text-[9px] text-main-muted mt-1 leading-relaxed">
+          战役将从当前活跃大盘移出，并永久封存至<strong>【战史档案】</strong>中。所有 KR、任务流水与复盘记录均完整保留！
+        </p>
+      </div>
+      <input type="hidden" id="archive-confirm-boss-id">
+      <div class="flex gap-2 pt-1">
+        <button onclick="toggleModal('archive-confirm-modal')" class="flex-1 py-1.5 glass-inner text-xs font-bold text-main-muted rounded-xl active:scale-95">
+          取消
+        </button>
+        <button onclick="executeArchiveBoss()" class="flex-1 py-1.5 bg-gradient-to-r from-amber-600 to-yellow-600 text-white font-black text-xs rounded-xl shadow active:scale-95">
+          确认归档
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 弹窗 6：神装检视与穿脱 -->
+  <div id="equipment-inspect-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4">
+    <div class="w-full max-w-xs glass-panel border border-purple-500/40 rounded-[2rem] p-5 text-center space-y-3">
+      <div id="inspect-item-icon" class="text-3xl">⚔️</div>
+      <div>
+        <span id="inspect-item-rarity" class="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400">史诗</span>
+        <h3 id="inspect-item-name" class="text-sm font-black text-main-title mt-1">专注破晓之刃</h3>
+        <p id="inspect-item-desc" class="text-[9px] text-main-muted mt-0.5 leading-relaxed">斩断浮躁的心智利刃</p>
+      </div>
+
+      <div class="p-2.5 rounded-xl glass-inner flex justify-around text-[10px] font-mono font-black" id="inspect-stat-box">
+        <span class="text-purple-500">智识 +2.0</span>
+        <span class="text-main-muted">部位: 神器</span>
+      </div>
+
+      <div class="space-y-1.5">
+        <button id="inspect-action-btn" onclick="executeInspectAction()" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-xs rounded-xl shadow active:scale-95 transition-all">
+          立即装备
+        </button>
+        <button onclick="dismantleInspectItem()" class="w-full py-1.5 glass-inner text-red-500 hover:text-red-400 font-bold text-[9px] rounded-xl active:scale-95 transition-all">
+          分解为潜能点 (+2 💎)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 弹窗 7：新建欲望犒赏 -->
+  <div id="add-reward-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md hidden p-4">
+    <div class="w-full max-w-xs glass-panel border border-amber-500/40 rounded-[2rem] p-5 space-y-3">
+      <div class="flex justify-between items-center pb-1.5 border-b border-black/5 dark:border-white/10">
+        <h3 class="text-xs font-black text-main-title flex items-center gap-1"><span>🎁</span> 新建欲望犒赏</h3>
+        <button onclick="toggleModal('add-reward-modal')" class="text-main-muted hover:text-main-title p-1 text-sm font-bold">✕</button>
+      </div>
+
+      <div class="space-y-2">
+        <div>
+          <label class="text-[8px] font-black text-main-muted uppercase tracking-wider block mb-1">奖励名称</label>
+          <input type="text" id="new-reward-title" placeholder="如：无负罪畅玩主机游戏 2 小时" class="w-full ui-input rounded-xl p-2 text-xs outline-none font-bold">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[8px] font-black text-main-muted uppercase tracking-wider block mb-1">消耗潜能点</label>
+            <input type="number" id="new-reward-cost" value="5" min="1" class="w-full ui-input rounded-xl p-1.5 text-xs outline-none font-mono">
+          </div>
+          <div>
+            <label class="text-[8px] font-black text-main-muted uppercase tracking-wider block mb-1">图腾图标</label>
+            <input type="text" id="new-reward-icon" value="🎮" class="w-full ui-input rounded-xl p-1.5 text-center text-xs outline-none">
+          </div>
+        </div>
+      </div>
+
+      <button onclick="submitAddReward()" class="w-full py-2 bg-gradient-to-r from-amber-600 to-yellow-600 text-white font-black text-xs rounded-xl shadow active:scale-95 transition-all">
+        封入欲望宝阁
+      </button>
+    </div>
+  </div>
+
+  <!-- 弹窗 8：120 分制战役自评 -->
+  <div id="score-okr-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md hidden p-4">
+    <div class="w-full max-w-sm glass-panel border border-amber-500/40 rounded-[2rem] p-5 space-y-3.5">
+      <div class="flex justify-between items-center pb-1.5 border-b border-black/5 dark:border-white/10">
+        <div>
+          <span class="text-[8px] font-black uppercase text-amber-600 dark:text-amber-400">OKR Evaluation (120 Max)</span>
+          <h3 class="text-xs font-black text-main-title flex items-center gap-1"><span>🏆</span> 战役复盘与 120 分自评</h3>
+        </div>
+        <button onclick="toggleModal('score-okr-modal')" class="text-main-muted hover:text-main-title p-1 text-sm font-bold">✕</button>
+      </div>
+      <input type="hidden" id="scoring-boss-id">
+
+      <div class="space-y-2.5">
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-[9px] font-black text-main-muted uppercase tracking-wider">达成得分 (120 分制)</label>
+            <span id="score-val-display" class="text-xs font-mono font-black text-amber-600 dark:text-amber-400">100 分 (标杆达成)</span>
+          </div>
+          <input type="range" id="scoring-range" min="0" max="120" step="5" value="100" oninput="updateScoreDisplay(this.value)" class="w-full accent-amber-500 cursor-pointer">
+          <div class="flex justify-between text-[7px] text-main-subtle font-mono mt-0.5">
+            <span>0分 (未动)</span>
+            <span>60分 (及格)</span>
+            <span>100分 (标杆)</span>
+            <span>120分 (突破)</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[9px] font-black text-main-muted uppercase tracking-wider block mb-1">全局复盘洞察</label>
+          <textarea id="scoring-notes" placeholder="记录本战役成功经验、阻塞卡点与关键突破..." class="w-full ui-input rounded-xl p-2.5 text-xs min-h-[70px] outline-none"></textarea>
+        </div>
+      </div>
+
+      <button onclick="submitScoreOkr()" class="w-full py-2.5 bg-gradient-to-r from-amber-600 to-yellow-600 text-white font-black text-xs rounded-xl shadow-lg active:scale-95 transition-all">
+        封存档案 · 注入成果潜能
+      </button>
+    </div>
+  </div>
+
+  <!-- 弹窗 9：系统设置 -->
+  <div id="settings-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md hidden p-4">
+    <div class="w-full max-w-sm glass-panel rounded-[2rem] p-5 space-y-3.5 max-h-[90vh] overflow-y-auto scrollbar-hide">
+      <div class="flex justify-between items-center pb-1.5 border-b border-black/5 dark:border-white/10">
+        <h3 class="text-xs font-black text-main-title flex items-center gap-1.5"><span>⚙️</span> 系统设置</h3>
+        <button onclick="toggleModal('settings-modal')" class="text-main-muted hover:text-main-title p-1 text-sm font-bold">✕</button>
+      </div>
+
+      <div class="space-y-2.5">
+        <div>
+          <label class="text-[9px] font-black text-main-muted uppercase tracking-wider block mb-1">使者称谓代号</label>
+          <input type="text" id="setting-player-name" class="w-full ui-input rounded-xl p-2 text-xs outline-none font-bold">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[9px] font-black text-main-muted uppercase tracking-wider block mb-1">出生年份</label>
+            <input type="number" id="setting-birth-year" class="w-full ui-input rounded-xl p-2 text-xs outline-none font-mono">
+          </div>
+          <div>
+            <label class="text-[9px] font-black text-main-muted uppercase tracking-wider block mb-1">预期寿命刻度</label>
+            <input type="number" id="setting-target-age" class="w-full ui-input rounded-xl p-2 text-xs outline-none font-mono">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[9px] font-black text-main-muted uppercase tracking-wider block mb-1">视觉模式基准</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="setThemeMode('light')" class="p-2 rounded-xl border border-black/10 dark:border-white/10 flex items-center justify-center gap-1 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800">
+              <span>☀️</span> 纯净浅色
+            </button>
+            <button onclick="setThemeMode('dark')" class="p-2 rounded-xl border border-black/10 dark:border-white/10 flex items-center justify-center gap-1 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800">
+              <span>🌙</span> 暗黑星空
+            </button>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-black/5 dark:border-white/10 flex gap-2">
+          <button onclick="exportDataJSON()" class="flex-1 py-2 rounded-xl glass-inner text-[10px] font-bold text-main-muted hover:text-main-title flex items-center justify-center gap-1">
+            <span>📥</span> 备份数据
+          </button>
+          <label class="flex-1 py-2 rounded-xl glass-inner text-[10px] font-bold text-main-muted hover:text-main-title flex items-center justify-center gap-1 cursor-pointer">
+            <span>📤</span> 恢复数据
+            <input type="file" accept=".json" onchange="importDataJSON(event)" class="hidden">
+          </label>
+        </div>
+      </div>
+
+      <button onclick="saveSettings()" class="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-black text-xs rounded-xl shadow active:scale-95 transition-all">
+        保存并应用
+      </button>
+    </div>
+  </div>
+
+  <!-- 轻量通知容器 -->
+  <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] space-y-2 pointer-events-none"></div>
+
+  <script>
+    class SoundFX {
+      constructor() { this.ctx = null; this.enabled = true; }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+      }
+      playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch(e) {}
+      }
+      playSlash() { this.playTone(280, 'sawtooth', 0.14, 0.18); }
+      playCrit() {
+        this.playTone(480, 'triangle', 0.2, 0.2);
+        setTimeout(() => this.playTone(640, 'triangle', 0.25, 0.25), 60);
+      }
+      playLootDrop() {
+        [587.33, 739.99, 880, 1174.66].forEach((f, i) => {
+          setTimeout(() => this.playTone(f, 'sine', 0.25, 0.12), i * 70);
+        });
+      }
+      playEquip() { this.playTone(987.77, 'sine', 0.15, 0.12); }
+      playLevelUp() {
+        [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+          setTimeout(() => this.playTone(f, 'triangle', 0.35, 0.18), i * 90);
+        });
+      }
+      playCoin() {
+        this.playTone(987.77, 'sine', 0.08, 0.12);
+        setTimeout(() => this.playTone(1318.51, 'sine', 0.2, 0.12), 70);
+      }
+    }
+    const sound = new SoundFX();
+
+    const triggerHaptic = (pattern = [30]) => {
+      if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+        try { navigator.vibrate(pattern); } catch (e) {}
+      }
+    };
+
+    function showToast(msg, icon = '✨') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const el = document.createElement('div');
+      el.className = 'glass-panel px-3.5 py-1.5 rounded-xl shadow-xl flex items-center gap-1.5 text-xs font-black text-main-title border border-purple-500/40 animate-bounce pointer-events-auto';
+      el.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 2600);
+    }
+
+    const SHANHAIJING_BOSS_DB = [
+      { name: "混沌·浑敦无面", epithet: "无序深渊", icon: "👹", lore: "《西山经》天山有神焉，其状如黄囊，赤如丹火，六足四翼，浑敦无面目，是识歌舞。" },
+      { name: "九首·相柳毒沼", epithet: "污秽毒泉", icon: "🐍", lore: "《海外北经》相柳者，九首人面，蛇身面青，所食无不涸，所至皆为污沟。" },
+      { name: "背德·穷奇风翼", epithet: "逆天凶兽", icon: "🐅", lore: "《海内北经》穷奇状如虎，有翼，食人从首始，所食尽骨肉。" },
+      { name: "顽冥·梼杌凶神", epithet: "顽固执念", icon: "🐗", lore: "《西次四经》其状如虎而犬毛，长二尺，人面，虎足，猪口牙。" },
+      { name: "饕餮·大荒噬界", epithet: "贪欲巨壑", icon: "🧌", lore: "《北次三经》其状如羊身人面，目在腋下，虎齿人爪，音如婴儿。" },
+      { name: "钟山·烛九阴", epithet: "永夜之瞳", icon: "🐉", lore: "《海外北经》钟山之神名曰烛阴，视为昼，瞑为夜，吹为冬，呼为夏。" },
+      { name: "不屈·断首刑天", epithet: "战意烈魂", icon: "🪓", lore: "《海外西经》刑天与帝争神，帝断其首，以乳为目，以脐为口，操干戚以舞。" },
+      { name: "赤炎·神禽毕方", epithet: "浮躁焦炎", icon: "🦅", lore: "《西山经》有鸟焉，其状如鹤，一足，赤文青质而白喙，名曰毕方。" }
+    ];
+
+    const STAT_CONFIG = {
+      cognition: { name: "智识", icon: "🧠", color: "text-purple-600 dark:text-purple-400", hex: 0x9333ea },
+      discipline: { name: "律令", icon: "⚡", color: "text-blue-600 dark:text-blue-400", hex: 0x2563eb },
+      vitality: { name: "体魄", icon: "🔥", color: "text-orange-600 dark:text-orange-400", hex: 0xea580c },
+      capital: { name: "财资", icon: "💎", color: "text-emerald-600 dark:text-emerald-400", hex: 0x059669 },
+      bond: { name: "联结", icon: "🤝", color: "text-pink-600 dark:text-pink-400", hex: 0xdb2777 },
+      none: { name: "业务", icon: "🏢", color: "text-slate-500", hex: 0x64748b }
+    };
+
+    const LOOT_POOL = [
+      { name: "专注破晓之刃", slot: "weapon", rarity: "史诗", stat: "cognition", boost: 2.0, desc: "斩断浮躁的心智利刃" },
+      { name: "律令折光护符", slot: "relic", rarity: "稀有", stat: "discipline", boost: 1.5, desc: "抵御怠惰心魔的信物" },
+      { name: "晨曦轻羽长靴", slot: "armor", rarity: "稀有", stat: "vitality", boost: 1.8, desc: "踏破荆棘的敏捷战靴" },
+      { name: "复利万象金契", slot: "weapon", rarity: "神话", stat: "capital", boost: 3.2, desc: "商业壁垒的黄金符印" },
+      { name: "共鸣通灵圣袍", slot: "armor", rarity: "史诗", stat: "bond", boost: 2.2, desc: "散发情绪价值的圣袍" },
+      { name: "玄极破壁神铠", slot: "armor", rarity: "神话", stat: "discipline", boost: 3.0, desc: "金汤壁垒，心若磐石" }
+    ];
+
+    // 本地时间精准换算器，避免 UTC 转换时差导致的日期回退
+    const formatDateToLocalYMD = (d) => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    const getTodayDateStr = () => formatDateToLocalYMD(new Date());
+    const getFutureDateStr = (days) => formatDateToLocalYMD(new Date(Date.now() + days * 24 * 3600 * 1000));
+    const getPastDateStr = (days) => formatDateToLocalYMD(new Date(Date.now() - days * 24 * 3600 * 1000));
+
+    const DEFAULT_GAME_STATE = {
+      theme: 'dark',
+      player: {
+        name: "星界使者",
+        level: 1,
+        exp: 0,
+        nextLevelExp: 100,
+        statPoints: 5,
+        ragePoints: 35,
+        comboCount: 0,
+        birthYear: 2000,
+        targetAge: 80,
+        stats: { cognition: 5.0, discipline: 5.0, vitality: 5.0, capital: 5.0, bond: 5.0 },
+        equipped: {
+          weapon: { id: "eq_init_1", name: "新兵拓荒短刃", slot: "weapon", rarity: "普通", stat: "discipline", boost: 0.8, desc: "初入现实战场的朴素铁刃" },
+          armor: null,
+          relic: null
+        },
+        inventory: [
+          { id: "inv_1", name: "晨曦轻羽长靴", slot: "armor", rarity: "稀有", stat: "vitality", boost: 1.8, desc: "踏破荆棘的敏捷战靴" },
+          { id: "inv_2", name: "律令折光护符", slot: "relic", rarity: "稀有", stat: "discipline", boost: 1.5, desc: "抵御怠惰心魔的信物" }
+        ]
+      },
+      activeTab: 'home',
+      okrViewMode: 'dashboard',
+      activeBossId: 'boss_shanhai_1',
+      selectedKrIdByBoss: { 'boss_shanhai_1': 'kr_2' },
+      inventoryCategory: 'all',
+      bosses: [
+        {
+          id: 'boss_shanhai_1',
+          name: "混沌·浑敦无面",
+          title: "构建高可用调度引擎与示范运行体系",
+          quarter: "2026 Q3 (W1-W13)",
+          startDate: getPastDateStr(60),
+          endDate: getFutureDateStr(30),
+          score: 100,
+          scoreNotes: "核心引擎已跑通仿真压测，场站联调冲刺中。",
+          maxHp: 3000,
+          currentHp: 2150,
+          bossIcon: "👹",
+          elementWeakness: "cognition",
+          isArchived: false,
+          keyResults: [
+            {
+              id: 'kr_1',
+              label: "KR1",
+              text: "核心调度引擎重构与仿真压测",
+              startDate: getPastDateStr(60),
+              endDate: getPastDateStr(15),
+              progress: 100,
+              status: 'completed',
+              statusText: "已交付 (100%)",
+              stat: "cognition",
+              tasks: [
+                { id: 't_1_1', name: "多智能体状态机重构", priority: 'high', startDate: getPastDateStr(60), endDate: getPastDateStr(35), done: true, deliverable: "跑通100%单测", retro: "架构解耦顺畅", nextStep: "输出技术文档", completedAt: "08-10 14:00" },
+                { id: 't_1_2', name: "高并发动态仿真压测", priority: 'normal', startDate: getPastDateStr(34), endDate: getPastDateStr(15), done: true, deliverable: "压测报告出具，P99<15ms", retro: "缓存防击穿策略得当", nextStep: "全面归档", completedAt: "08-28 17:30" }
+              ]
+            },
+            {
+              id: 'kr_2',
+              label: "KR2",
+              text: "示范起降站端边缘系统集成",
+              startDate: getPastDateStr(35),
+              endDate: getFutureDateStr(10),
+              progress: 45,
+              status: 'lagging',
+              statusText: "进行中 (45%)",
+              stat: "discipline",
+              tasks: [
+                { id: 't_2_1', name: "边缘网关协议转换跑通", priority: 'normal', startDate: getPastDateStr(35), endDate: getPastDateStr(10), done: true, deliverable: "完成5类非标传感器协议解析", retro: "丢包率控制在0.01%", nextStep: "全双工闭环联调", completedAt: "09-02 11:20" },
+                { id: 't_2_2', name: "起降平台全双工通信闭环联调", priority: 'high', startDate: getPastDateStr(9), endDate: getFutureDateStr(10), done: false, deliverable: "", retro: "", nextStep: "", completedAt: null }
+              ]
+            },
+            {
+              id: 'kr_3',
+              label: "KR3",
+              text: "飞行运行实测与应急演练",
+              startDate: getPastDateStr(10),
+              endDate: getFutureDateStr(30),
+              progress: 20,
+              status: 'in_progress',
+              statusText: "进行中 (20%)",
+              stat: "vitality",
+              tasks: [
+                { id: 't_3_1', name: "首飞全链路告警演练", priority: 'normal', startDate: getPastDateStr(10), endDate: getFutureDateStr(10), done: false, deliverable: "", retro: "", nextStep: "", completedAt: null },
+                { id: 't_3_2', name: "500架次日志审计与试飞归档", priority: 'low', startDate: getFutureDateStr(11), endDate: getFutureDateStr(30), done: false, deliverable: "", retro: "", nextStep: "", completedAt: null }
+              ]
+            }
+          ],
+          deliverables: [
+            { time: "08-10 14:00", text: "【KR1】多智能体状态机重构 ➔ 跑通100%单测", krId: "kr_1" },
+            { time: "08-28 17:30", text: "【KR1】高并发动态仿真压测 ➔ 压测报告出具，P99<15ms", krId: "kr_1" },
+            { time: "09-02 11:20", text: "【KR2】边缘网关协议转换跑通 ➔ 完成5类非标传感器协议解析", krId: "kr_2" }
+          ]
+        }
+      ],
+      encounters: [
+        {
+          id: 'mob_wild_1',
+          name: "浮躁焦炎·浅尝辄止",
+          type: 'normal',
+          tier: '小怪',
+          mainStat: 'cognition',
+          hp: 120,
+          maxHp: 120,
+          exp: 60,
+          rageGain: 15,
+          icon: '🔥',
+          deliverableNote: '大荒巡逻怪 · 斩杀积累战意并增加智识',
+          isFromOkrDispatch: false
+        },
+        {
+          id: 'mob_wild_2',
+          name: "怠惰阴影·拖延心魔",
+          type: 'elite',
+          tier: '精英',
+          mainStat: 'discipline',
+          hp: 220,
+          maxHp: 220,
+          exp: 110,
+          rageGain: 25,
+          icon: '👤',
+          deliverableNote: '大荒精英 · 掉落战利品概率极高',
+          isFromOkrDispatch: false
+        },
+        {
+          id: 'mob_ready_1',
+          name: "战果破盾·起降平台通信联调",
+          type: 'elite',
+          tier: '战备',
+          mainStat: 'discipline',
+          hp: 260,
+          maxHp: 260,
+          exp: 180,
+          rageGain: 40,
+          icon: '⚔️',
+          deliverableNote: '推进【KR2 站端集成】：通信闭环',
+          linkedKrId: 'kr_2',
+          isFromOkrDispatch: true
+        }
+      ],
+      treasury: [
+        { id: 1, title: "游戏无负罪沉浸 1 小时", cost: 3, icon: "🎮", desc: "汗水换来的惬意娱乐" },
+        { id: 2, title: "精品咖啡 / 犒赏下午茶", cost: 4, icon: "☕", desc: "享受咖啡香气，放松身心" },
+        { id: 3, title: "心仪数码装备犒赏", cost: 12, icon: "🎧", desc: "犒赏攻坚战役大捷" }
+      ],
+      history: []
+    };
+
+    const STORAGE_KEY = "LIFE_RPG_SHANHAI_V7_PRISTINE";
+    let appState = (() => {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.player && parsed.bosses) {
+            if (!parsed.inventoryCategory) parsed.inventoryCategory = 'all';
+            if (!parsed.player.equipped) parsed.player.equipped = { weapon: null, armor: null, relic: null };
+            if (!parsed.player.inventory) parsed.player.inventory = [];
+            if (!parsed.encounters) parsed.encounters = [];
+            return parsed;
+          }
+        }
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(DEFAULT_GAME_STATE));
+    })();
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {}
+    }
+
+    function applyTheme() {
+      const isLight = appState.theme === 'light';
+      if (isLight) {
+        document.body.classList.remove('theme-dark');
+        document.body.classList.add('theme-light');
+        document.getElementById('theme-toggle-icon').innerText = "☀️";
+      } else {
+        document.body.classList.remove('theme-light');
+        document.body.classList.add('theme-dark');
+        document.getElementById('theme-toggle-icon').innerText = "🌙";
+      }
+    }
+
+    function toggleTheme() {
+      appState.theme = appState.theme === 'light' ? 'dark' : 'light';
+      sound.playEquip();
+      triggerHaptic([25]);
+      saveState();
+      applyTheme();
+      renderActiveView();
+    }
+
+    function setThemeMode(mode) {
+      appState.theme = mode;
+      sound.playEquip();
+      saveState();
+      applyTheme();
+      renderActiveView();
+      toggleModal('settings-modal');
+    }
+
+    function randomizeShanhaiBoss() {
+      const boss = SHANHAIJING_BOSS_DB[Math.floor(Math.random() * SHANHAIJING_BOSS_DB.length)];
+      document.getElementById('new-okr-boss-name').value = boss.name;
+      document.getElementById('new-okr-boss-icon').value = boss.icon;
+      document.getElementById('new-okr-boss-lore').innerText = `【${boss.epithet}】${boss.lore}`;
+      sound.playTone(600, 'triangle', 0.1);
+      triggerHaptic([20]);
+    }
+
+    function applyCyclePreset(days, label) {
+      const now = new Date();
+      const startStr = now.toISOString().slice(0, 10);
+      const end = new Date(now.getTime() + days * 24 * 3600 * 1000);
+      const endStr = end.toISOString().slice(0, 10);
+
+      document.getElementById('new-okr-quarter').value = label;
+      document.getElementById('new-okr-start').value = startStr;
+      document.getElementById('new-okr-end').value = endStr;
+      sound.playTone(720, 'sine', 0.1);
+    }
+
+    function addKrRowInModal() {
+      const container = document.getElementById('modal-kr-rows-container');
+      const idx = container.children.length + 1;
+      const row = document.createElement('div');
+      row.className = "p-2 rounded-xl glass-inner space-y-1.5 border border-purple-500/20";
+      row.innerHTML = `
+        <div class="flex justify-between items-center">
+          <span class="text-[8px] font-black text-purple-600 dark:text-purple-400">🛡️ 关键结果标尺 #${idx}</span>
+          ${idx > 1 ? `<button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-500 hover:text-red-400 text-xs font-bold px-1">✕</button>` : ''}
+        </div>
+        <input type="text" placeholder="标尺描述 (如: 完成核心调度引擎重构与仿真压测)" class="kr-input-text w-full ui-input rounded-lg p-1.5 text-xs outline-none font-bold">
+        <div class="grid grid-cols-2 gap-2">
+          <input type="date" value="${getTodayDateStr()}" class="kr-input-start ui-input rounded-lg p-1 text-[9px] outline-none font-mono">
+          <input type="date" value="${getFutureDateStr(30)}" class="kr-input-end ui-input rounded-lg p-1 text-[9px] outline-none font-mono">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <select class="kr-input-stat ui-input rounded-lg p-1 text-[9px] font-bold outline-none">
+            <option value="none" selected>🏢 纯净业务 (不绑定属性)</option>
+            <option value="cognition">智识 🧠</option>
+            <option value="discipline">律令 ⚡</option>
+            <option value="vitality">体魄 🔥</option>
+            <option value="capital">财资 💎</option>
+            <option value="bond">联结 🤝</option>
+          </select>
+          <input type="text" placeholder="首个行动项 (如: 梳理架构)" class="kr-input-first-task ui-input rounded-lg p-1 text-[9px] outline-none">
+        </div>
+      `;
+      container.appendChild(row);
+    }
+
+    function openCreateOkrModal() {
+      document.getElementById('new-okr-title').value = "";
+      randomizeShanhaiBoss();
+      applyCyclePreset(90, '季度攻坚 (W1-W12)');
+      
+      const container = document.getElementById('modal-kr-rows-container');
+      container.innerHTML = "";
+      addKrRowInModal();
+      toggleModal('create-okr-modal');
+    }
+
+    function submitCreateOkr() {
+      const title = document.getElementById('new-okr-title').value.trim();
+      const bossName = document.getElementById('new-okr-boss-name').value.trim() || "山海大荒神兽";
+      const bossIcon = document.getElementById('new-okr-boss-icon').value.trim() || "👹";
+      const quarter = document.getElementById('new-okr-quarter').value.trim() || "季度攻坚 (W1-W12)";
+      const startDate = document.getElementById('new-okr-start').value || getTodayDateStr();
+      const endDate = document.getElementById('new-okr-end').value || getFutureDateStr(90);
+
+      if (!title) {
+        showToast("请填写战役宏愿目标 (Objective)", "⚠️");
+        return;
+      }
+
+      const container = document.getElementById('modal-kr-rows-container');
+      const rows = container.querySelectorAll('.glass-inner');
+      const keyResults = [];
+
+      rows.forEach((row, idx) => {
+        const text = row.querySelector('.kr-input-text').value.trim();
+        const krStart = row.querySelector('.kr-input-start').value || startDate;
+        const krEnd = row.querySelector('.kr-input-end').value || endDate;
+        const stat = row.querySelector('.kr-input-stat').value || "none";
+        const firstTask = row.querySelector('.kr-input-first-task').value.trim() || "启动该标尺基础攻坚";
+
+        if (text) {
+          keyResults.push({
+            id: 'kr_' + Date.now() + '_' + idx,
+            label: `KR${idx + 1} 支撑`,
+            text,
+            startDate: krStart,
+            endDate: krEnd,
+            progress: 0,
+            status: 'in_progress',
+            statusText: "进行中 (0%)",
+            stat,
+            retroText: "",
+            tasks: [
+              {
+                id: 'task_' + Date.now() + '_' + idx,
+                name: firstTask,
+                priority: 'normal',
+                startDate: krStart,
+                endDate: krEnd,
+                done: false,
+                deliverable: "",
+                retro: "",
+                nextStep: "",
+                completedAt: null
+              }
+            ]
+          });
+        }
+      });
+
+      if (keyResults.length === 0) {
+        showToast("至少需添加一项关键结果标尺 (KR)", "⚠️");
+        return;
+      }
+
+      sound.playCrit();
+      triggerHaptic([60, 40, 80]);
+
+      const newBoss = {
+        id: 'boss_' + Date.now(),
+        name: bossName,
+        title: title,
+        quarter: quarter,
+        startDate: startDate,
+        endDate: endDate,
+        score: 100,
+        scoreNotes: "战役立誓出征，山海神兽降世化为常驻破障目标。",
+        maxHp: keyResults.length * 1000,
+        currentHp: keyResults.length * 1000,
+        bossIcon: bossIcon,
+        elementWeakness: keyResults[0]?.stat !== 'none' ? keyResults[0].stat : 'discipline',
+        isArchived: false,
+        keyResults: keyResults,
+        deliverables: []
+      };
+
+      appState.bosses.unshift(newBoss);
+      appState.activeBossId = newBoss.id;
+      appState.okrViewMode = 'detail';
+      if (!appState.selectedKrIdByBoss) appState.selectedKrIdByBoss = {};
+      appState.selectedKrIdByBoss[newBoss.id] = keyResults[0].id;
+      saveState();
+
+      toggleModal('create-okr-modal');
+      renderActiveView();
+      showToast(`战役确立！魔神【${bossName}】已就位！`, "⚔️");
+    }
+
+    let threeRenderer = null;
+    let threeAnimationId = null;
+
+    function initBeast3D() {
+      const container = document.getElementById('beast-3d-canvas');
+      if (!container || !window.THREE) return;
+
+      if (threeAnimationId) cancelAnimationFrame(threeAnimationId);
+      if (threeRenderer) {
+        try { threeRenderer.dispose(); } catch(e) {}
+      }
+      container.innerHTML = "";
+
+      const width = container.clientWidth || 320;
+      const height = container.clientHeight || 190;
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
+      camera.position.z = 4.2;
+
+      threeRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      threeRenderer.setSize(width, height);
+      threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      container.appendChild(threeRenderer.domElement);
+
+      const beastGroup = new THREE.Group();
+      scene.add(beastGroup);
+
+      const isLight = appState.theme === 'light';
+      const mainColor = isLight ? 0x9333ea : 0xa855f7;
+
+      const p = appState.player;
+      const stage = Math.min(Math.floor((p.level - 1) / 5), 4);
+      let animatedParts = [];
+
+      if (stage === 0) {
+        const coreGeom = new THREE.SphereGeometry(0.35, 32, 32);
+        const coreMat = new THREE.MeshBasicMaterial({ color: mainColor, transparent: true, opacity: 0.95 });
+        const core = new THREE.Mesh(coreGeom, coreMat);
+        beastGroup.add(core);
+        animatedParts.push({ mesh: core, type: 'pulse' });
+
+        const eggGeom = new THREE.SphereGeometry(0.65, 32, 32);
+        eggGeom.scale(1, 1.35, 1);
+        const eggMat = new THREE.MeshPhysicalMaterial({
+          color: mainColor,
+          emissive: mainColor,
+          emissiveIntensity: isLight ? 0.3 : 0.8,
+          transmission: 0.85,
+          roughness: 0.15,
+          transparent: true,
+          opacity: isLight ? 0.35 : 0.55
+        });
+        const egg = new THREE.Mesh(eggGeom, eggMat);
+        beastGroup.add(egg);
+        animatedParts.push({ mesh: egg, type: 'breath' });
+      } else {
+        const bodyGeom = new THREE.SphereGeometry(0.48, 32, 32);
+        const bodyMat = new THREE.MeshPhysicalMaterial({
+          color: mainColor,
+          emissive: mainColor,
+          emissiveIntensity: 0.7,
+          transmission: 0.8,
+          roughness: 0.2,
+          transparent: true,
+          opacity: 0.9
+        });
+        const body = new THREE.Mesh(bodyGeom, bodyMat);
+        beastGroup.add(body);
+        animatedParts.push({ mesh: body, type: 'float' });
+
+        const wings = [];
+        [-1, 1].forEach(dir => {
+          const wingGeom = new THREE.TorusGeometry(0.7, 0.04, 16, 64, Math.PI * 0.6);
+          const wingMat = new THREE.MeshBasicMaterial({ color: mainColor, transparent: true, opacity: 0.75 });
+          const wing = new THREE.Mesh(wingGeom, wingMat);
+          wing.position.set(dir * 0.4, 0.1, 0);
+          wing.rotation.y = dir * 0.4;
+          body.add(wing);
+          wings.push({ mesh: wing, dir });
+        });
+        animatedParts.push({ type: 'wings', wings });
+      }
+
+      const pCount = 180;
+      const pGeom = new THREE.BufferGeometry();
+      const pPos = new Float32Array(pCount * 3);
+      for(let i = 0; i < pCount; i++) {
+        const radius = 1.0 + Math.random() * 2.0;
+        const angle = Math.random() * Math.PI * 2;
+        pPos[i*3] = Math.cos(angle) * radius;
+        pPos[i*3+1] = (Math.random() - 0.5) * 2.5;
+        pPos[i*3+2] = Math.sin(angle) * radius;
+      }
+      pGeom.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+      const pMat = new THREE.PointsMaterial({
+        color: mainColor,
+        size: 0.03,
+        transparent: true,
+        opacity: isLight ? 0.4 : 0.65,
+        blending: THREE.AdditiveBlending
+      });
+      const particles = new THREE.Points(pGeom, pMat);
+      scene.add(particles);
+
+      scene.add(new THREE.AmbientLight(0xffffff, isLight ? 2.8 : 2.2));
+
+      let isDragging = false;
+      let prevTouch = { x: 0, y: 0 };
+      let rotationOffset = { x: 0, y: 0 };
+
+      const onStart = (e) => {
+        isDragging = true;
+        const t = e.touches ? e.touches[0] : e;
+        prevTouch = { x: t.clientX, y: t.clientY };
+      };
+      const onMove = (e) => {
+        if (!isDragging) return;
+        const t = e.touches ? e.touches[0] : e;
+        const dx = t.clientX - prevTouch.x;
+        const dy = t.clientY - prevTouch.y;
+        rotationOffset.y += dx * 0.015;
+        rotationOffset.x += dy * 0.015;
+        prevTouch = { x: t.clientX, y: t.clientY };
+      };
+      const onEnd = () => { isDragging = false; };
+
+      container.addEventListener('mousedown', onStart);
+      container.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onEnd);
+      container.addEventListener('touchstart', onStart, { passive: true });
+      container.addEventListener('touchmove', onMove, { passive: true });
+      window.addEventListener('touchend', onEnd);
+
+      const clock = new THREE.Clock();
+      function animate() {
+        threeAnimationId = requestAnimationFrame(animate);
+        const t = clock.getElapsedTime();
+        beastGroup.rotation.y = rotationOffset.y + t * 0.15;
+        beastGroup.rotation.x = rotationOffset.x + Math.sin(t * 0.4) * 0.08;
+
+        animatedParts.forEach(p => {
+          if (p.type === 'pulse') p.mesh.scale.setScalar(1 + Math.sin(t * 3.5) * 0.15);
+          if (p.type === 'breath') p.mesh.scale.set(1 + Math.sin(t * 1.5) * 0.03, 1.35 + Math.sin(t * 1.5) * 0.04, 1 + Math.sin(t * 1.5) * 0.03);
+          if (p.type === 'float') p.mesh.position.y = Math.sin(t * 2) * 0.08;
+          if (p.type === 'wings') {
+            p.wings.forEach(w => {
+              w.mesh.rotation.z = Math.sin(t * 4.5) * 0.3 * w.dir;
+            });
+          }
+        });
+        particles.rotation.y = -t * 0.03;
+        threeRenderer.render(scene, camera);
+      }
+      animate();
+    }
+
+    function renderHomeView() {
+      const p = appState.player;
+      const todayStr = getTodayDateStr();
+
+      const urgentTasks = [];
+      appState.bosses.filter(b => !b.isArchived).forEach(boss => {
+        (boss.keyResults || []).forEach(kr => {
+          (kr.tasks || []).forEach(task => {
+            if (!task.done && task.endDate) {
+              const diffDays = Math.ceil((new Date(task.endDate).getTime() - new Date(todayStr).getTime()) / (24 * 3600 * 1000));
+              if (diffDays <= 5) {
+                urgentTasks.push({
+                  bossId: boss.id,
+                  bossName: boss.name,
+                  krId: kr.id,
+                  krLabel: kr.label,
+                  taskId: task.id,
+                  taskName: task.name,
+                  priority: task.priority,
+                  endDate: task.endDate,
+                  diffDays: diffDays
+                });
+              }
+            }
+          });
+        });
+      });
+
+      urgentTasks.sort((a, b) => a.diffDays - b.diffDays);
+      const activeBossesCount = appState.bosses.filter(b => !b.isArchived).length;
+
+      return `
+        <div class="space-y-3.5">
+          <!-- 1. 3D 元神圣所法相 (核心视觉图腾) -->
+          <section class="glass-panel rounded-3xl p-4 space-y-2 relative overflow-hidden border border-purple-500/20">
+            <div class="flex justify-between items-center px-1">
+              <div>
+                <span class="text-[8px] font-black uppercase text-purple-600 dark:text-purple-400 tracking-wider px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20">Lv.${p.level} 本命元神</span>
+                <h2 class="text-sm font-black text-main-title mt-0.5 flex items-center gap-1.5">
+                  <span>🐉</span> ${p.name} · 星界法相
+                </h2>
+              </div>
+              <div class="flex items-center gap-1 px-2.5 py-0.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-300 font-mono text-[9px] font-black">
+                <span>战意</span>
+                <span>${p.ragePoints || 0}/100</span>
+              </div>
+            </div>
+
+            <div id="beast-3d-canvas" class="w-full h-44 rounded-2xl flex items-center justify-center cursor-grab active:cursor-grabbing overflow-hidden"></div>
+
+            <!-- 三联核心数据胶囊 -->
+            <div class="grid grid-cols-3 gap-2 text-center pt-1">
+              <div onclick="switchTab('okr')" class="p-2.5 rounded-xl glass-inner cursor-pointer hover:border-purple-500/40 transition-all flex flex-col items-center">
+                <span class="text-xs">🎯</span>
+                <span class="text-[8px] text-main-muted font-bold mt-0.5">活跃战役</span>
+                <span class="text-xs font-mono font-black text-purple-600 dark:text-purple-400">${activeBossesCount} 个</span>
+              </div>
+              <div class="p-2.5 rounded-xl glass-inner flex flex-col items-center border ${urgentTasks.length > 0 ? 'border-amber-500/30' : ''}">
+                <span class="text-xs">⏳</span>
+                <span class="text-[8px] text-main-muted font-bold mt-0.5">5日紧迫项</span>
+                <span class="text-xs font-mono font-black ${urgentTasks.length > 0 ? 'text-amber-500' : 'text-main-title'}">${urgentTasks.length} 项</span>
+              </div>
+              <div onclick="switchTab('treasury')" class="p-2.5 rounded-xl glass-inner cursor-pointer hover:border-purple-500/40 transition-all flex flex-col items-center">
+                <span class="text-xs">💎</span>
+                <span class="text-[8px] text-main-muted font-bold mt-0.5">可用潜能</span>
+                <span class="text-xs font-mono font-black text-amber-500">${p.statPoints} 币</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2. 战鼓催征 · 5日内决战任务雷达 -->
+          <section class="glass-panel rounded-3xl p-3.5 space-y-2.5 border ${urgentTasks.length > 0 ? 'border-amber-500/30 shadow-amber-500/5' : 'border-black/5 dark:border-white/5'}">
+            <div class="flex justify-between items-center px-1">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs animate-pulse">🥁</span>
+                <h4 class="text-xs font-black text-main-title uppercase">战鼓催征 · 5日内决战任务 (${urgentTasks.length})</h4>
+              </div>
+              <span class="text-[8px] font-mono text-purple-600 dark:text-purple-400 font-bold">高优先级攻坚</span>
+            </div>
+
+            ${urgentTasks.length === 0 ? `
+              <div class="p-3.5 rounded-xl glass-inner text-center space-y-1">
+                <span class="text-base">🧘</span>
+                <p class="text-[9px] font-bold text-main-title">未来 5 天内无紧迫决战任务</p>
+                <p class="text-[8px] text-main-subtle">节奏良好，可前往【宏愿战役】规划下阶段攻坚！</p>
+              </div>
+            ` : `
+              <div class="space-y-1.5 max-h-52 overflow-y-auto scrollbar-hide pr-0.5">
+                ${urgentTasks.map(item => `
+                  <div class="p-2 rounded-xl glass-inner flex justify-between items-center border ${item.diffDays < 0 ? 'border-red-500/30 bg-red-500/5' : item.diffDays <= 2 ? 'border-amber-500/30 bg-amber-500/5' : 'border-black/5 dark:border-white/5'}">
+                    <div class="overflow-hidden pr-2">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-[7px] font-black px-1.5 py-0.2 rounded font-mono ${item.diffDays < 0 ? 'bg-red-500 text-white' : item.diffDays === 0 ? 'bg-amber-500 text-white' : 'bg-purple-500/15 text-purple-600 dark:text-purple-300'}">
+                          ${item.diffDays < 0 ? `已逾期 ${Math.abs(item.diffDays)} 天` : item.diffDays === 0 ? '今日截止' : `剩 ${item.diffDays} 天`}
+                        </span>
+                        <span class="text-[8px] text-main-muted truncate font-bold">【${item.bossName}】${item.krLabel}</span>
+                      </div>
+                      <h5 class="text-[10px] font-black text-main-title truncate mt-0.5">${item.taskName}</h5>
+                    </div>
+
+                    <button onclick="openTaskRetroModal('${item.bossId}', '${item.krId}', '${item.taskId}')" class="px-2.5 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[8px] font-black rounded-lg active:scale-95 shadow shrink-0">
+                      复盘达成 ➔
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            `}
+          </section>
+        </div>
+      `;
+    }
+
+    function renderBattleView() {
+      const currentBoss = appState.bosses.find(b => b.id === appState.activeBossId && !b.isArchived) || appState.bosses.find(b => !b.isArchived) || appState.bosses[0];
+      const bossHpPct = currentBoss ? Math.max(0, Math.min(100, Math.round((currentBoss.currentHp / currentBoss.maxHp) * 100))) : 0;
+      const isBossDefeated = currentBoss && currentBoss.currentHp <= 0;
+      const rage = appState.player.ragePoints || 0;
+
+      const mapStages = [
+        { step: 1, name: "誓师灵营", icon: "⛺", reqProgress: 0 },
+        { step: 2, name: "迷雾石窟", icon: "🌲", reqProgress: 25 },
+        { step: 3, name: "绝壁断崖", icon: "⛰️", reqProgress: 50 },
+        { step: 4, name: "煞气前哨", icon: "🌋", reqProgress: 75 },
+        { step: 5, name: "极渊绝巅", icon: currentBoss ? currentBoss.bossIcon : "👹", reqProgress: 100 }
+      ];
+
+      const campaignProgress = currentBoss && currentBoss.keyResults && currentBoss.keyResults.length > 0
+        ? Math.round(currentBoss.keyResults.reduce((acc, k) => acc + (k.progress || 0), 0) / currentBoss.keyResults.length)
+        : 0;
+
+      return `
+        <div class="space-y-3.5">
+          <!-- 1. 山海大荒魔神主战台 (精致舒展排版) -->
+          <section class="glass-panel rounded-3xl p-4 space-y-3 border border-purple-500/20">
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-[8px] font-black uppercase text-purple-600 dark:text-purple-400 tracking-wider">Shanhai Expedition Battlefront</span>
+                <h3 class="text-xs font-black text-main-title flex items-center gap-1 mt-0.5">
+                  <span>🗺️</span> 征途领地 · 【${currentBoss ? currentBoss.name : '山海魔神'}】
+                </h3>
+              </div>
+
+              ${appState.bosses.filter(b => !b.isArchived).length > 1 ? `
+                <select onchange="appState.activeBossId = this.value; saveState(); renderActiveView();" class="text-[9px] ui-input rounded-xl p-1 font-bold outline-none">
+                  ${appState.bosses.filter(b => !b.isArchived).map(b => `<option value="${b.id}" ${b.id === (currentBoss?.id) ? 'selected' : ''}>${b.name}</option>`).join('')}
+                </select>
+              ` : ''}
+            </div>
+
+            <!-- 五阶段紧凑走廊 -->
+            <div class="p-2.5 rounded-xl glass-inner">
+              <div class="flex justify-between items-center">
+                ${mapStages.map((stage, sIdx) => {
+                  const isUnlocked = campaignProgress >= stage.reqProgress;
+                  const isCurrent = (campaignProgress >= stage.reqProgress) && (sIdx === mapStages.length - 1 || campaignProgress < mapStages[sIdx + 1].reqProgress);
+
+                  return `
+                    <div class="flex flex-col items-center text-center cursor-pointer" onclick="showToast('【第${stage.step}关: ${stage.name}】当前推进度: ${campaignProgress}%', '🚩')">
+                      <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm shadow-sm transition-all ${isCurrent ? 'bg-gradient-to-tr from-purple-600 to-amber-500 text-white scale-105 ring-2 ring-purple-500/30' : isUnlocked ? 'bg-purple-600/20 border border-purple-500 text-purple-400' : 'bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 text-main-subtle opacity-50'}">
+                        <span>${stage.icon}</span>
+                      </div>
+                      <span class="text-[7px] font-black mt-1 truncate max-w-[50px] ${isUnlocked ? 'text-main-title' : 'text-main-subtle'}">${stage.name}</span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- 魔神血槽与天诛玄斩 -->
+            <div class="space-y-2 p-3 rounded-xl glass-inner border border-red-500/20">
+              <div class="flex justify-between items-center text-[9px] font-mono font-black">
+                <span class="text-main-muted flex items-center gap-1.5">
+                  <span class="text-sm">${currentBoss ? currentBoss.bossIcon : '👹'}</span>
+                  <span>魔神护盾血量</span>
+                </span>
+                <span class="${isBossDefeated ? 'text-emerald-500' : 'text-red-500'} font-bold">${currentBoss ? currentBoss.currentHp : 0} / ${currentBoss ? currentBoss.maxHp : 0} HP (${bossHpPct}%)</span>
+              </div>
+              <div class="h-2 w-full bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-red-600 via-rose-500 to-purple-600 rounded-full transition-all duration-700" style="width: ${bossHpPct}%;"></div>
+              </div>
+
+              <div class="pt-1 flex justify-between items-center">
+                <div class="flex items-center gap-1 text-[8px] font-mono">
+                  <span class="text-amber-500 font-black">⚡ 战意: ${rage}/100</span>
+                  <span class="text-main-subtle">(满25可发动)</span>
+                </div>
+                <button onclick="attackBossDirectly()" class="px-3 py-1.5 rounded-xl font-black text-[10px] shadow-sm transition-all flex items-center gap-1 ${rage >= 25 && !isBossDefeated ? 'bg-gradient-to-r from-amber-500 to-red-600 text-white active:scale-95' : 'glass-inner text-main-subtle opacity-50 cursor-not-allowed'}">
+                  <span>💥</span>
+                  <span>天诛玄斩 (-25战意)</span>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2. 拦路魔灵与战备怪兽 -->
+          <section class="space-y-2">
+            <div class="flex justify-between items-center px-1">
+              <div>
+                <h4 class="text-xs font-black text-main-title uppercase flex items-center gap-1.5">
+                  <span>🏹</span> 征途前线怪兽 (${appState.encounters.length})
+                </h4>
+                <p class="text-[8px] text-main-subtle">现实攻坚任务映射在此 · 拔剑斩获经验与神装</p>
+              </div>
+
+              <div class="flex items-center gap-1.5">
+                <button onclick="spawnWildMonster('normal')" class="px-2 py-1 rounded-lg glass-inner hover:border-purple-500/50 text-[8px] font-bold text-main-muted active:scale-95 transition-all">
+                  + 巡逻怪
+                </button>
+                <button onclick="spawnWildMonster('elite')" class="px-2 py-1 rounded-lg bg-purple-600/10 hover:bg-purple-600/20 text-purple-600 dark:text-purple-300 text-[8px] font-black border border-purple-500/30 active:scale-95 transition-all">
+                  + 战备精英
+                </button>
+              </div>
+            </div>
+
+            ${appState.encounters.length === 0 ? `
+              <div class="p-6 rounded-2xl glass-panel text-center space-y-1.5 border border-black/5 dark:border-white/5">
+                <div class="text-2xl opacity-60">🏕️</div>
+                <h5 class="text-xs font-black text-main-title">征途当前平静，暂无拦路妖邪</h5>
+                <p class="text-[8px] text-main-subtle max-w-xs mx-auto leading-relaxed">
+                  在【宏愿战役】中达成任务或点击右上角巡逻，都会唤出迎战怪兽！
+                </p>
+              </div>
+            ` : appState.encounters.map(enc => `
+              <div class="glass-panel rounded-2xl p-2.5 flex justify-between items-center transition-all hover:border-purple-500/40 border border-black/5 dark:border-white/5 shadow-sm">
+                <div class="flex items-center gap-2.5 overflow-hidden pr-2">
+                  <div class="w-9 h-9 rounded-xl glass-inner flex items-center justify-center text-lg shrink-0 border border-purple-500/20">
+                    ${enc.icon || '⚔️'}
+                  </div>
+                  <div class="overflow-hidden space-y-0.5">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <span class="text-[7px] font-black px-1.5 py-0.2 rounded ${enc.isFromOkrDispatch ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30' : enc.type === 'elite' ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30' : 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20'}">
+                        ${enc.tier || '怪兽'}
+                      </span>
+                      <h5 class="text-[10px] font-black text-main-title truncate">${enc.name}</h5>
+                    </div>
+                    <p class="text-[8px] text-main-muted truncate">${enc.deliverableNote || '大荒遭遇战'}</p>
+                    <div class="flex items-center gap-2 text-[7px] font-mono text-purple-600 dark:text-purple-400 font-bold">
+                      <span>EXP +${enc.exp}</span>
+                      <span>战意 +${enc.rageGain || 20}</span>
+                      <span>${STAT_CONFIG[enc.mainStat]?.name || '律令'} +0.2</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button onclick="defeatEncounter('${enc.id}')" class="px-3 py-1.5 bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-500 hover:to-purple-500 text-white font-black text-[10px] rounded-xl shadow active:scale-95 transition-all shrink-0 flex items-center gap-1">
+                  <span>⚔️</span>
+                  <span>拔剑</span>
+                </button>
+              </div>
+            `).join('')}
+          </section>
+        </div>
+      `;
+    }
+
+    function defeatEncounter(encId) {
+      const enc = appState.encounters.find(e => e.id === encId);
+      if (!enc) return;
+
+      sound.playSlash();
+      triggerHaptic([40, 80]);
+
+      appState.player.comboCount = (appState.player.comboCount || 0) + 1;
+      const comboBonus = Math.min(appState.player.comboCount * 5, 50);
+
+      const expEarned = enc.exp + comboBonus;
+      appState.player.exp += expEarned;
+      appState.player.ragePoints = Math.min(100, (appState.player.ragePoints || 0) + (enc.rageGain || 20));
+
+      const statKey = enc.mainStat || 'discipline';
+      if (statKey !== 'none' && appState.player.stats[statKey] !== undefined) {
+        appState.player.stats[statKey] = parseFloat(((appState.player.stats[statKey] || 5.0) + 0.2).toFixed(1));
+      }
+
+      while (appState.player.exp >= appState.player.nextLevelExp) {
+        appState.player.exp -= appState.player.nextLevelExp;
+        appState.player.level += 1;
+        appState.player.nextLevelExp = Math.floor(appState.player.nextLevelExp * 1.25);
+        appState.player.statPoints += 3;
+        sound.playLevelUp();
+        showToast(`突破！境界升至 Lv.${appState.player.level}，获得 3 潜能点！`, "🌟");
+      }
+
+      appState.encounters = appState.encounters.filter(e => e.id !== encId);
+      const shouldDropLoot = enc.isFromOkrDispatch || enc.type === 'elite' || (Math.random() < 0.45);
+
+      if (shouldDropLoot) {
+        const pool = LOOT_POOL;
+        const filtered = statKey !== 'none' ? pool.filter(i => i.stat === statKey) : pool;
+        const chosen = (filtered.length > 0 ? filtered : pool)[Math.floor(Math.random() * (filtered.length > 0 ? filtered.length : pool.length))];
+        const newLoot = {
+          id: 'loot_' + Date.now(),
+          name: chosen.name,
+          slot: chosen.slot,
+          rarity: chosen.rarity,
+          stat: chosen.stat,
+          boost: chosen.boost,
+          desc: chosen.desc
+        };
+        appState.player.inventory.push(newLoot);
+        sound.playLootDrop();
+        showToast(`爆出神装【${newLoot.name}】(${newLoot.rarity})！已收入行囊！`, "🎁");
+      } else {
+        showToast(`斩杀【${enc.name}】！战意 +${enc.rageGain || 20}，Combo x${appState.player.comboCount}！`, "⚡");
+      }
+
+      saveState();
+      updateTopBar();
+      renderActiveView();
+    }
+
+    function attackBossDirectly() {
+      const boss = appState.bosses.find(b => b.id === appState.activeBossId && !b.isArchived) || appState.bosses.find(b => !b.isArchived) || appState.bosses[0];
+      if (!boss || boss.currentHp <= 0) {
+        showToast("当前魔神已全灭或暂无活跃目标！", "⚠️");
+        return;
+      }
+
+      const rage = appState.player.ragePoints || 0;
+      if (rage < 25) {
+        showToast("战意值不足 25 点！请先通过斩杀小怪或现实修炼积攒战意！", "🔒");
+        sound.playTone(250, 'sawtooth', 0.15);
+        return;
+      }
+
+      sound.playCrit();
+      triggerHaptic([80, 50, 100]);
+
+      appState.player.ragePoints -= 25;
+      const baseDmg = 350 + (appState.player.level * 25);
+      const finalDmg = Math.round(baseDmg * 1.5);
+
+      boss.currentHp = Math.max(0, boss.currentHp - finalDmg);
+
+      if (boss.currentHp === 0) {
+        sound.playCrit();
+        triggerHaptic([100, 100, 200]);
+        appState.player.statPoints += 8;
+        showToast(`魔神【${boss.name}】被彻底荡平！获得 8 💎 潜能奖赏与极品神装！`, "🏆");
+        
+        const topLoot = LOOT_POOL[Math.floor(Math.random() * LOOT_POOL.length)];
+        appState.player.inventory.push({
+          id: 'loot_' + Date.now(),
+          name: topLoot.name,
+          slot: topLoot.slot,
+          rarity: "神话",
+          stat: topLoot.stat,
+          boost: parseFloat((topLoot.boost * 1.3).toFixed(1)),
+          desc: topLoot.desc
+        });
+        sound.playLootDrop();
+      } else {
+        showToast(`发动天诛玄斩！重创魔神造成 ${finalDmg} 真实暴击伤害！`, "💥");
+      }
+
+      saveState();
+      updateTopBar();
+      renderActiveView();
+    }
+
+    function spawnWildMonster(tier = 'normal') {
+      const wildPool = [
+        { name: "杂念游魂·心流涣散", stat: "discipline", hp: 100, exp: 50, rageGain: 15, icon: "👻", note: "日常心智障碍" },
+        { name: "信息噪音·过载焦虑", stat: "cognition", hp: 120, exp: 65, rageGain: 18, icon: "📡", note: "碎片化信息摄入过量" },
+        { name: "低能怠速·精力亏空", stat: "vitality", hp: 110, exp: 60, rageGain: 16, icon: "💤", note: "缺乏活动带来的疲惫惰性" },
+        { name: "盲目冲动·非理性消费", stat: "capital", hp: 130, exp: 70, rageGain: 20, icon: "💸", note: "多巴胺陷阱" },
+        { name: "社交耗竭·内耗心魔", stat: "bond", hp: 120, exp: 65, rageGain: 18, icon: "🥀", note: "无意义应酬带来的耗竭" }
+      ];
+
+      const elitePool = [
+        { name: "拖延巨像·万丈深渊", stat: "discipline", hp: 260, exp: 140, rageGain: 35, icon: "🗿", note: "强力精英怪 · 需全力拔剑攻坚" },
+        { name: "浮躁焦炎·浅尝辄止", stat: "cognition", hp: 240, exp: 130, rageGain: 30, icon: "🔥", note: "强力精英怪 · 缺乏沉潜深度" }
+      ];
+
+      const chosen = tier === 'elite' 
+        ? elitePool[Math.floor(Math.random() * elitePool.length)]
+        : wildPool[Math.floor(Math.random() * wildPool.length)];
+
+      appState.encounters.unshift({
+        id: 'mob_' + Date.now(),
+        name: chosen.name,
+        type: tier,
+        tier: tier === 'elite' ? '精英' : '巡逻',
+        mainStat: chosen.stat,
+        hp: chosen.hp,
+        maxHp: chosen.hp,
+        exp: chosen.exp,
+        rageGain: chosen.rageGain,
+        icon: chosen.icon,
+        deliverableNote: chosen.note,
+        linkedKrId: null,
+        isFromOkrDispatch: false
+      });
+
+      sound.playSlash();
+      triggerHaptic([30]);
+      saveState();
+      updateTopBar();
+      renderActiveView();
+      showToast(`大荒遭遇【${chosen.name}】！`, "⚔️");
+    }
+
+    let isGanttSidebarCollapsed = false;
+    let expandedGanttKrIds = { 'kr_1': true, 'kr_2': true, 'kr_3': true };
+    let ganttTimeScale = 'week';
+
+    function setGanttTimeScale(scale) {
+      ganttTimeScale = scale;
+      sound.playTone(720, 'triangle', 0.1);
+      renderActiveView();
+      const scaleNameMap = { quarter: '季度宏观', month: '自然月度', week: '自然周度', day: '日冲刺' };
+      showToast(`已切换至【${scaleNameMap[scale]}】时间轴`, "📅");
+    }
+
+    function scrollGanttToToday() {
+      const container = document.getElementById('gantt-scroll-viewport');
+      const todayMarker = document.getElementById('gantt-today-vertical-line');
+      if (container && todayMarker) {
+        const targetScroll = todayMarker.offsetLeft - container.clientWidth / 2;
+        container.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
+        sound.playTone(780, 'sine', 0.12);
+        triggerHaptic([25]);
+        showToast("已居中对齐今日时间点", "📍");
+      }
+    }
+
+    function toggleGanttSidebar() {
+      isGanttSidebarCollapsed = !isGanttSidebarCollapsed;
+      sound.playTone(600, 'sine', 0.08);
+      renderActiveView();
+    }
+
+    function toggleGanttKrSubtasks(krId, e) {
+      if (e) e.stopPropagation();
+      expandedGanttKrIds[krId] = !expandedGanttKrIds[krId];
+      sound.playTone(650, 'sine', 0.08);
+      renderActiveView();
+    }
+
+    function calculateGanttTimeEngine(bossStartDateStr, bossEndDateStr, scale) {
+      const sRaw = new Date(bossStartDateStr || getPastDateStr(60));
+      const eRaw = new Date(bossEndDateStr || getFutureDateStr(30));
+      let baseStart = isNaN(sRaw.getTime()) ? Date.now() - 30 * 24 * 3600 * 1000 : sRaw.getTime();
+      let baseEnd = isNaN(eRaw.getTime()) ? Date.now() + 60 * 24 * 3600 * 1000 : eRaw.getTime();
+      if (baseEnd <= baseStart) baseEnd = baseStart + 30 * 24 * 3600 * 1000;
+
+      let axisStart, axisEnd;
+      let headerItems = [];
+      let minTrackWidth = 850;
+
+      if (scale === 'quarter') {
+        minTrackWidth = 750;
+        const sD = new Date(baseStart);
+        const eD = new Date(baseEnd);
+        let curY = sD.getFullYear();
+        let curQ = Math.floor(sD.getMonth() / 3);
+        const targetY = eD.getFullYear();
+        const targetQ = Math.floor(eD.getMonth() / 3);
+
+        axisStart = new Date(curY, curQ * 3, 1).getTime();
+        axisEnd = new Date(targetY, (targetQ + 1) * 3, 0, 23, 59, 59).getTime();
+
+        let iterY = curY;
+        let iterQ = curQ;
+        while (iterY < targetY || (iterY === targetY && iterQ <= targetQ)) {
+          headerItems.push({ label: `'${String(iterY).slice(2)} Q${iterQ + 1}` });
+          iterQ++;
+          if (iterQ > 3) { iterQ = 0; iterY++; }
+        }
+      } else if (scale === 'month') {
+        minTrackWidth = 900;
+        const sD = new Date(baseStart);
+        const eD = new Date(baseEnd);
+        let cur = new Date(sD.getFullYear(), sD.getMonth(), 1);
+        const endMonthLimit = new Date(eD.getFullYear(), eD.getMonth() + 1, 0, 23, 59, 59);
+
+        axisStart = cur.getTime();
+        axisEnd = endMonthLimit.getTime();
+
+        while (cur <= endMonthLimit && headerItems.length < 24) {
+          headerItems.push({ label: `${cur.getFullYear()}.${cur.getMonth() + 1}月` });
+          cur.setMonth(cur.getMonth() + 1);
+        }
+      } else if (scale === 'day') {
+        minTrackWidth = 2200;
+        axisStart = baseStart - 3 * 24 * 3600 * 1000;
+        axisEnd = baseEnd + 5 * 24 * 3600 * 1000;
+        const totalSpan = axisEnd - axisStart;
+        const totalDays = Math.min(Math.ceil(totalSpan / (24 * 3600 * 1000)), 120);
+
+        for (let d = 0; d <= totalDays; d += 2) {
+          const itemDate = new Date(axisStart + d * 24 * 3600 * 1000);
+          headerItems.push({ label: `${itemDate.getMonth() + 1}/${itemDate.getDate()}` });
+        }
+      } else {
+        // week 视图
+        minTrackWidth = 1100;
+        const sD = new Date(baseStart);
+        // 对齐到周一
+        const dayOfWeek = sD.getDay();
+        const diffToMon = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+        sD.setDate(sD.getDate() + diffToMon);
+        sD.setHours(0, 0, 0, 0);
+
+        axisStart = sD.getTime();
+        const totalWeeks = Math.max(Math.ceil((baseEnd - axisStart) / (7 * 24 * 3600 * 1000)) + 1, 8);
+        axisEnd = axisStart + totalWeeks * 7 * 24 * 3600 * 1000;
+
+        for (let w = 0; w < totalWeeks; w++) {
+          const wDate = new Date(axisStart + w * 7 * 24 * 3600 * 1000);
+          headerItems.push({ label: `W${w + 1} (${wDate.getMonth() + 1}/${wDate.getDate()})` });
+        }
+      }
+
+      const totalSpan = Math.max(axisEnd - axisStart, 24 * 3600 * 1000);
+      const nowMs = Date.now();
+      const todayPct = Math.min(100, Math.max(0, ((nowMs - axisStart) / totalSpan) * 100));
+
+      const getCoords = (startStr, endStr) => {
+        let itemStart = new Date(startStr || bossStartDateStr).getTime();
+        let itemEnd = new Date(endStr || bossEndDateStr).getTime();
+        if (isNaN(itemStart)) itemStart = baseStart;
+        if (isNaN(itemEnd)) itemEnd = baseEnd;
+
+        const leftPct = Math.min(97, Math.max(0, ((itemStart - axisStart) / totalSpan) * 100));
+        const rightPct = Math.min(100, Math.max(leftPct + 1.5, ((itemEnd - axisStart) / totalSpan) * 100));
+        const widthPct = Math.max(rightPct - leftPct, 2.5);
+        return { leftPct, widthPct };
+      };
+
+      return { headerItems, todayPct, minTrackWidth, getCoords };
+    }
+
+    let isTacticalRoomCollapsed = false;
+    function toggleTacticalRoom() {
+      isTacticalRoomCollapsed = !isTacticalRoomCollapsed;
+      sound.playTone(600, 'sine', 0.06);
+      renderActiveView();
+    }
+
+    function selectGanttKr(bossId, krId) {
+      if (!appState.selectedKrIdByBoss) appState.selectedKrIdByBoss = {};
+      appState.selectedKrIdByBoss[bossId] = krId;
+      sound.playTone(550, 'sine', 0.08);
+      renderActiveView();
+    }
+
+    function setOkrViewMode(mode, bossId) {
+      appState.okrViewMode = mode;
+      if (bossId) appState.activeBossId = bossId;
+      sound.playTone(600, 'sine', 0.1);
+      saveState();
+      renderActiveView();
+    }
+
+    function renderOkrView() {
+      // 模式 C：战史总谱与规范化导出卷轴
+      if (appState.okrViewMode === 'chronicle') {
+        return `
+          <div class="space-y-3.5">
+            <!-- 顶部导航与导出操作条 -->
+            <div class="flex justify-between items-center px-1">
+              <button onclick="setOkrViewMode('dashboard')" class="px-2.5 py-1 rounded-xl glass-inner text-main-muted hover:text-main-title text-[9px] font-bold flex items-center gap-1 active:scale-95 transition-all">
+                <span>← 返回战役大盘</span>
+              </button>
+              <div class="flex items-center gap-2">
+                <button onclick="exportOkrToExcel()" class="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 rounded-xl text-[9px] font-black active:scale-95 transition-all flex items-center gap-1">
+                  <span>📥 导出 Excel 战史全案</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="p-4 rounded-3xl glass-panel border border-amber-500/30 space-y-3.5">
+              <div>
+                <h4 class="text-xs font-black text-main-title flex items-center gap-1.5">
+                  <span>📜</span> 全域项目战史与履约全案
+                </h4>
+                <p class="text-[8px] text-main-subtle mt-0.5">完整封存每个项目的战略目标、关键标尺、所有行动项完成状态、交付物凭据与战术复盘</p>
+              </div>
+
+              <div class="space-y-3.5">
+                ${appState.bosses.map((boss, bIdx) => {
+                  const keyResults = boss.keyResults || [];
+                  const totalTasks = keyResults.reduce((acc, k) => acc + (k.tasks ? k.tasks.length : 0), 0);
+                  const completedTasks = keyResults.reduce((acc, k) => acc + (k.tasks ? k.tasks.filter(t => t.done).length : 0), 0);
+                  const totalProgress = keyResults.length > 0 
+                    ? Math.round(keyResults.reduce((acc, k) => acc + (k.progress || 0), 0) / keyResults.length) 
+                    : 0;
+
+                  return `
+                    <div class="p-3.5 rounded-2xl glass-inner border border-purple-500/20 space-y-3">
+                      <!-- 1. 项目与战役基本盘头信息 -->
+                      <div class="flex justify-between items-start pb-2 border-b border-black/5 dark:border-white/5">
+                        <div class="flex items-center gap-2.5">
+                          <div class="w-10 h-10 rounded-xl glass-inner flex items-center justify-center text-xl shrink-0 border border-purple-500/30 shadow-inner">
+                            ${boss.bossIcon || '👹'}
+                          </div>
+                          <div>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                              <span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">${boss.name}</span>
+                              <span class="text-[8px] font-mono text-main-muted font-bold">${boss.quarter}</span>
+                              <span class="text-[7px] font-mono px-1.5 py-0.2 rounded ${boss.isArchived ? 'bg-amber-500/20 text-amber-500' : 'bg-emerald-500/20 text-emerald-500'} font-bold">
+                                ${boss.isArchived ? '已归档' : '活跃攻坚'}
+                              </span>
+                            </div>
+                            <h5 class="text-xs font-black text-main-title mt-0.5">${boss.title}</h5>
+                            <div class="text-[7px] text-main-subtle font-mono mt-0.5 flex items-center gap-2">
+                              <span>工期: ${boss.startDate || '-'} ~ ${boss.endDate || '-'}</span>
+                              <span>行动总进度: ${completedTasks}/${totalTasks} 项</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="text-right shrink-0">
+                          <span class="text-[9px] font-mono font-black px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 block">
+                            ${boss.score !== undefined ? boss.score : 100} 分
+                          </span>
+                          <span class="text-[7px] text-main-subtle mt-0.5 block font-mono">达成率 ${totalProgress}%</span>
+                        </div>
+                      </div>
+
+                      <!-- 2. 全局宏观复盘洞察 -->
+                      ${boss.scoreNotes ? `
+                        <div class="p-2.5 rounded-xl bg-amber-500/5 border border-amber-500/15 text-[8px] text-main-body space-y-0.5">
+                          <span class="text-[7px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 block font-mono">🏆 全局宏观复盘洞察</span>
+                          <p class="leading-relaxed text-main-title">${boss.scoreNotes}</p>
+                        </div>
+                      ` : ''}
+
+                      <!-- 3. 树状层级：关键标尺与详细行动项履约全景 -->
+                      <div class="space-y-2.5 pt-0.5">
+                        <div class="flex justify-between items-center text-[8px] font-black uppercase tracking-wider text-main-muted px-0.5">
+                          <span>🛡️ 关键标尺 (KR) 与任务履约明细 (${keyResults.length} 标尺)</span>
+                          <span class="text-purple-500 font-mono">穿透流水</span>
+                        </div>
+
+                        ${keyResults.length === 0 ? `
+                          <p class="text-[8px] text-main-subtle italic py-2 text-center">暂无标尺配置</p>
+                        ` : keyResults.map((kr, kIdx) => `
+                          <div class="p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 space-y-2">
+                            <!-- KR 标尺概要 -->
+                            <div class="flex justify-between items-center">
+                              <div class="overflow-hidden pr-2">
+                                <div class="flex items-center gap-1.5">
+                                  <span class="text-[7px] font-mono font-black px-1 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">${kr.label || `KR${kIdx+1}`}</span>
+                                  <span class="text-[9px] font-black text-main-title truncate">${kr.text}</span>
+                                </div>
+                                <span class="text-[7px] font-mono text-main-subtle block mt-0.5">排期: ${kr.startDate || '-'} ~ ${kr.endDate || '-'}</span>
+                              </div>
+                              <span class="text-[8px] font-mono font-black text-purple-600 dark:text-purple-400 shrink-0">${kr.progress || 0}%</span>
+                            </div>
+
+                            <!-- 该 KR 下的所有行动任务明细、成果与复盘 -->
+                            <div class="space-y-1.5 pl-2 border-l-2 border-purple-500/20">
+                              ${(!kr.tasks || kr.tasks.length === 0) ? `
+                                <div class="text-[7px] text-main-subtle italic py-1">暂无下属行动记录</div>
+                              ` : kr.tasks.map(task => `
+                                <div class="p-2 rounded-lg ${task.done ? 'bg-emerald-500/5 border border-emerald-500/20' : 'bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5'} space-y-1">
+                                  <div class="flex justify-between items-start">
+                                    <div class="flex items-center gap-1.5 overflow-hidden pr-2">
+                                      <span class="text-[8px] font-bold ${task.done ? 'text-emerald-500' : 'text-amber-500'} shrink-0">${task.done ? '✓' : '◇'}</span>
+                                      <h6 class="text-[9px] font-bold text-main-title truncate ${task.done ? '' : 'text-main-muted'}">${task.name}</h6>
+                                      <span class="text-[6px] px-1 rounded font-mono ${task.priority === 'high' ? 'bg-red-500/10 text-red-500' : 'bg-blue-500/10 text-blue-500'} shrink-0">
+                                        ${task.priority === 'high' ? '关键' : '常规'}
+                                      </span>
+                                    </div>
+                                    <span class="text-[7px] font-mono px-1 py-0.2 rounded shrink-0 ${task.done ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold' : 'text-main-subtle'}">
+                                      ${task.done ? '已完成' : '进行中'}
+                                    </span>
+                                  </div>
+
+                                  <!-- 工期与完成时间戳 -->
+                                  <div class="flex items-center justify-between text-[7px] font-mono text-main-subtle">
+                                    <span>工期: ${task.startDate ? task.startDate.slice(5) : ''} ~ ${task.endDate ? task.endDate.slice(5) : ''}</span>
+                                    ${task.completedAt ? `<span class="text-emerald-600 dark:text-emerald-400">闭环时间: ${task.completedAt}</span>` : ''}
+                                  </div>
+
+                                  <!-- 交付成果记录 (Proof of Work) -->
+                                  ${task.deliverable ? `
+                                    <div class="p-1.5 rounded bg-black/5 dark:bg-white/5 text-[8px] text-main-body flex items-start gap-1">
+                                      <span class="text-[8px] shrink-0">📦</span>
+                                      <span class="leading-relaxed"><strong class="text-main-title">交付物:</strong> ${task.deliverable}</span>
+                                    </div>
+                                  ` : ''}
+
+                                  <!-- 复盘与归因心得 (Retro Insights) -->
+                                  ${task.retro ? `
+                                    <div class="p-1.5 rounded bg-purple-500/5 border border-purple-500/10 text-[8px] text-purple-700 dark:text-purple-300 flex items-start gap-1">
+                                      <span class="text-[8px] shrink-0">💡</span>
+                                      <span class="leading-relaxed"><strong class="font-bold">复盘洞察:</strong> ${task.retro}</span>
+                                    </div>
+                                  ` : ''}
+
+                                  <!-- 下一步规划 (如有) -->
+                                  ${task.nextStep ? `
+                                    <div class="text-[7px] text-main-subtle font-mono">
+                                      ➔ 下一步: ${task.nextStep}
+                                    </div>
+                                  ` : ''}
+                                </div>
+                              `).join('')}
+                            </div>
+                          </div>
+                        `).join('')}
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 模式 A：战役总览大盘 (扁平通透卡片，点击直接进入)
+      if (appState.okrViewMode === 'dashboard') {
+        const activeBosses = appState.bosses.filter(b => !b.isArchived);
+
+        return `
+          <div class="space-y-3">
+            <div class="flex justify-between items-center px-1">
+              <div>
+                <h3 class="text-xs font-black uppercase text-main-title tracking-wider flex items-center gap-1.5">
+                  <span>🎯</span> 宏愿战役大盘 (${activeBosses.length})
+                </h3>
+                <p class="text-[8px] text-main-subtle">点击卡片直达甘特作战指挥室</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="setOkrViewMode('chronicle')" class="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-xl text-[9px] font-black active:scale-95 transition-all flex items-center gap-1">
+                  <span>📜 战史与导出</span>
+                </button>
+                <button onclick="openCreateOkrModal()" class="px-2.5 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-[9px] font-black shadow active:scale-95 transition-all flex items-center gap-1">
+                  <span>+</span> 确立新战役
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-2.5">
+              ${activeBosses.length === 0 ? `
+                <div class="p-8 rounded-3xl glass-panel text-center space-y-3 border border-dashed border-purple-500/30">
+                  <div class="text-4xl opacity-70">🎯</div>
+                  <h4 class="text-xs font-black text-main-title">当前暂无活跃战役</h4>
+                  <p class="text-[9px] text-main-muted max-w-xs mx-auto leading-relaxed">
+                    所有战役已完成归档至战史，或尚未确立新目标。立下新的战略宏愿，召唤山海魔神出征！
+                  </p>
+                  <button onclick="openCreateOkrModal()" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-xs rounded-xl shadow active:scale-95 transition-all">
+                    + 确立新宏愿战役
+                  </button>
+                </div>
+              ` : activeBosses.map(boss => {
+                const totalProgress = boss.keyResults && boss.keyResults.length > 0 
+                  ? Math.round(boss.keyResults.reduce((acc, k) => acc + (k.progress || 0), 0) / boss.keyResults.length) 
+                  : 0;
+
+                return `
+                  <div onclick="setOkrViewMode('detail', '${boss.id}')" class="glass-panel rounded-2xl p-3.5 space-y-2 hover:border-purple-500/50 cursor-pointer transition-all border border-black/5 dark:border-white/5 shadow-sm group">
+                    <div class="flex justify-between items-start">
+                      <div class="flex items-center gap-2.5 overflow-hidden">
+                        <div class="w-9 h-9 rounded-xl glass-inner flex items-center justify-center text-lg border border-purple-500/30 shrink-0 shadow-inner group-hover:scale-105 transition-all">
+                          ${boss.bossIcon || '👹'}
+                        </div>
+                        <div class="overflow-hidden">
+                          <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-[8px] font-black uppercase px-1.5 py-0.2 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">${boss.name}</span>
+                            <span class="text-[8px] font-mono text-main-muted font-bold">${boss.quarter}</span>
+                          </div>
+                          <h4 class="text-[11px] font-black text-main-title mt-0.5 truncate">${boss.title}</h4>
+                        </div>
+                      </div>
+
+                      <div class="flex items-center gap-1 shrink-0 ml-2" onclick="event.stopPropagation()">
+                        <button onclick="requestArchiveBoss('${boss.id}')" class="p-1 rounded-lg glass-inner text-main-subtle hover:text-amber-500 text-[10px]" title="归档至战史">📦</button>
+                      </div>
+                    </div>
+
+                    <div class="p-2 rounded-xl glass-inner space-y-1">
+                      <div class="flex justify-between items-center text-[8px] font-mono">
+                        <span class="text-main-muted font-bold">总达成度</span>
+                        <span class="text-purple-600 dark:text-purple-400 font-black">${totalProgress}%</span>
+                      </div>
+                      <div class="h-1.5 w-full bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full transition-all duration-700" style="width: ${totalProgress}%;"></div>
+                      </div>
+                    </div>
+
+                    <div class="flex justify-between items-center text-[8px] text-main-muted font-mono px-0.5">
+                      <span>🛡️ 包含 <strong>${boss.keyResults.length}</strong> 项关键标尺</span>
+                      <span class="text-purple-500 font-bold group-hover:translate-x-0.5 transition-all">进入作战室 ➔</span>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // 模式 B：独立甘特图作战指挥室
+      const currentBoss = appState.bosses.find(b => b.id === appState.activeBossId) || appState.bosses[0];
+      if (!currentBoss) return `<div class="glass-panel p-6 rounded-2xl text-center">战役不存在，<button onclick="setOkrViewMode('dashboard')" class="text-purple-500 underline">返回大盘</button></div>`;
+
+      if (!appState.selectedKrIdByBoss) appState.selectedKrIdByBoss = {};
+      let selectedKrId = appState.selectedKrIdByBoss[currentBoss.id];
+      let selectedKr = currentBoss.keyResults.find(k => k.id === selectedKrId) || currentBoss.keyResults[0];
+      if (!selectedKr && currentBoss.keyResults.length > 0) {
+        selectedKr = currentBoss.keyResults[0];
+        appState.selectedKrIdByBoss[currentBoss.id] = selectedKr.id;
+      }
+
+      const timeEngine = calculateGanttTimeEngine(currentBoss.startDate, currentBoss.endDate, ganttTimeScale);
+
+      return `
+        <div class="space-y-3">
+          <div class="flex justify-between items-center px-1">
+            <button onclick="setOkrViewMode('dashboard')" class="px-2.5 py-1 rounded-xl glass-inner text-main-muted hover:text-main-title text-[9px] font-bold flex items-center gap-1 active:scale-95 transition-all">
+              <span>← 返回战役大盘</span>
+            </button>
+            <div class="flex items-center gap-1.5">
+              <button onclick="openScoreModal('${currentBoss.id}')" class="px-2 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-xl text-[8px] font-black active:scale-95 transition-all flex items-center gap-1">
+                <span>🏆 ${currentBoss.score !== undefined ? currentBoss.score : 100} 分</span>
+              </button>
+              <button onclick="requestArchiveBoss('${currentBoss.id}')" class="px-2 py-1 glass-inner text-main-muted hover:text-amber-500 rounded-xl text-[8px] font-bold">
+                📦 归档
+              </button>
+            </div>
+          </div>
+
+          <section class="glass-panel rounded-3xl p-3.5 space-y-2.5 shadow-xl border border-purple-500/30">
+            <div class="pb-2 border-b border-black/5 dark:border-white/5 space-y-0.5">
+              <div class="text-[11px] font-bold text-main-title leading-snug">
+                <span class="font-black text-purple-600 dark:text-purple-400">战略宏愿: </span>
+                <span>${currentBoss.title}</span>
+              </div>
+              <div class="flex items-center gap-3 text-[8px] text-main-muted font-mono flex-wrap">
+                <span>排期: <strong class="text-main-title">${currentBoss.startDate} ~ ${currentBoss.endDate}</strong></span>
+                <span>周期: <span class="text-main-title font-bold">${currentBoss.quarter}</span></span>
+              </div>
+            </div>
+
+            <!-- 甘特图操作工具条 -->
+            <div class="flex justify-between items-center gap-2 px-1 pt-0.5 flex-wrap">
+              <div class="flex items-center gap-0.5 p-0.5 rounded-xl glass-inner">
+                <button onclick="setGanttTimeScale('quarter')" class="px-2 py-0.5 rounded-lg text-[8px] font-black transition-all ${ganttTimeScale === 'quarter' ? 'bg-purple-600 text-white shadow-sm' : 'text-main-muted hover:text-main-title'}">季度</button>
+                <button onclick="setGanttTimeScale('month')" class="px-2 py-0.5 rounded-lg text-[8px] font-black transition-all ${ganttTimeScale === 'month' ? 'bg-purple-600 text-white shadow-sm' : 'text-main-muted hover:text-main-title'}">月度</button>
+                <button onclick="setGanttTimeScale('week')" class="px-2 py-0.5 rounded-lg text-[8px] font-black transition-all ${ganttTimeScale === 'week' ? 'bg-purple-600 text-white shadow-sm' : 'text-main-muted hover:text-main-title'}">周度</button>
+                <button onclick="setGanttTimeScale('day')" class="px-2 py-0.5 rounded-lg text-[8px] font-black transition-all ${ganttTimeScale === 'day' ? 'bg-purple-600 text-white shadow-sm' : 'text-main-muted hover:text-main-title'}">日冲刺</button>
+              </div>
+
+              <div class="flex items-center gap-1.5">
+                <button onclick="scrollGanttToToday()" class="px-2 py-0.5 rounded-xl glass-inner border border-red-500/30 hover:bg-red-500/10 text-red-600 dark:text-red-400 text-[8px] font-black flex items-center gap-1 active:scale-95 transition-all">
+                  <span>📍 今日</span>
+                </button>
+                <button onclick="toggleGanttSidebar()" class="px-2 py-0.5 rounded-xl glass-inner border border-purple-500/30 text-purple-600 dark:text-purple-400 text-[8px] font-black flex items-center gap-1 active:scale-95 transition-all">
+                  <span>${isGanttSidebarCollapsed ? '◨ 展开' : '◧ 收起'}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 甘特图跑道：整行联动物理绝对对齐架构 -->
+            <div class="rounded-2xl border border-black/10 dark:border-white/10 overflow-hidden shadow-inner flex flex-col" style="background-color: var(--gantt-bg);">
+              <div class="flex overflow-x-auto gantt-scroll scroll-smooth" id="gantt-scroll-viewport">
+                <!-- 左侧固定/贴靠栏 (Sticky Column) -->
+                <div class="${isGanttSidebarCollapsed ? 'w-14' : 'w-48 sm:w-60'} shrink-0 sticky left-0 z-30 border-r border-black/10 dark:border-white/10 select-none shadow-md" style="background-color: var(--gantt-header-bg);">
+                  <!-- 表头 -->
+                  <div class="h-8 px-2 flex justify-between items-center border-b border-black/10 dark:border-white/10">
+                    <span class="text-[8px] font-black text-main-muted uppercase truncate ${isGanttSidebarCollapsed ? 'hidden' : 'block'}">关键标尺 / 行动</span>
+                    <span class="text-[8px] font-mono text-purple-600 dark:text-purple-400 font-black ${isGanttSidebarCollapsed ? 'mx-auto' : ''}">${currentBoss.keyResults.length} KR</span>
+                  </div>
+
+                  <!-- 标尺各行（高度与右侧逐行严格 1:1 锁死） -->
+                  <div>
+                    ${currentBoss.keyResults.map((kr, kIdx) => {
+                      const isSelected = selectedKr && (selectedKr.id === kr.id);
+                      const isExpanded = expandedGanttKrIds[kr.id] !== false;
+
+                      if (isGanttSidebarCollapsed) {
+                        return `
+                          <div class="border-b border-black/5 dark:border-white/5">
+                            <!-- KR 主行：高度锁死 h-10 (40px) -->
+                            <div onclick="selectGanttKr('${currentBoss.id}', '${kr.id}')" class="h-10 px-1 flex flex-col items-center justify-center cursor-pointer transition-all ${isSelected ? 'bg-purple-600/20 text-purple-600 font-black' : 'hover:bg-purple-500/5 text-main-muted'}">
+                              <span class="text-[9px] font-mono font-bold">K${kIdx + 1}</span>
+                              <span class="text-[7px]">${kr.progress >= 100 ? '🟢' : '🔵'}</span>
+                            </div>
+                            <!-- 子任务行：每行高度锁死 h-7 (28px) -->
+                            ${isExpanded && kr.tasks.length > 0 ? kr.tasks.map(() => `
+                              <div class="h-7 flex items-center justify-center border-t border-black/5 dark:border-white/5 text-[7px] text-main-subtle">◇</div>
+                            `).join('') : ''}
+                          </div>
+                        `;
+                      }
+
+                      return `
+                        <div class="border-b border-black/5 dark:border-white/5">
+                          <!-- KR 主行：高度锁死 h-10 (40px) 1:1 绝对对齐右侧 -->
+                          <div onclick="selectGanttKr('${currentBoss.id}', '${kr.id}')" class="h-10 px-2 flex items-center justify-between cursor-pointer transition-all ${isSelected ? 'bg-purple-600/15 border-l-4 border-purple-600 font-bold' : 'hover:bg-purple-500/5'}">
+                            <div class="overflow-hidden pr-1">
+                              <div class="text-[9px] font-black truncate leading-tight ${isSelected ? 'text-purple-600 dark:text-purple-400' : 'text-blue-600 dark:text-blue-400'}">
+                                ${kr.label} · ${kr.text}
+                              </div>
+                              <div class="text-[7px] font-mono text-main-muted truncate flex justify-between mt-0.5">
+                                <span>${kr.startDate ? kr.startDate.slice(5) : ''} ~ ${kr.endDate ? kr.endDate.slice(5) : ''}</span>
+                                <span class="font-bold text-purple-500 ml-1">${kr.progress}%</span>
+                              </div>
+                            </div>
+                            <button onclick="toggleGanttKrSubtasks('${kr.id}', event)" class="text-[8px] text-main-muted hover:text-purple-600 px-1 py-0.5 rounded glass-inner font-mono shrink-0 ml-1">
+                              ${isExpanded ? '▼' : '▶'}
+                            </button>
+                          </div>
+
+                          <!-- 子任务展开行：每行高度锁死 h-7 (28px) 1:1 绝对对齐右侧 -->
+                          ${isExpanded && kr.tasks.length > 0 ? kr.tasks.map(task => `
+                            <div class="h-7 pl-4 pr-2 flex items-center border-t border-black/5 dark:border-white/5 text-[7px] text-main-muted truncate bg-black/[0.02] dark:bg-white/[0.02]" title="${task.name}">
+                              <span class="mr-1 ${task.done ? 'text-emerald-500 font-bold' : 'text-purple-500'} shrink-0">${task.done ? '✓' : '◇'}</span>
+                              <span class="truncate ${task.done ? 'line-through opacity-70' : ''}">${task.name}</span>
+                            </div>
+                          `).join('') : ''}
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+
+                <!-- 右侧时间轴跑道：与左侧严格镜像并排 -->
+                <div class="flex-1 relative" style="min-width: ${timeEngine.minTrackWidth}px;">
+                  <!-- 右侧表头：高度锁死 h-8 (32px) -->
+                  <div class="h-8 flex text-center text-[9px] font-mono font-bold text-main-muted border-b border-black/10 dark:border-white/10">
+                    ${timeEngine.headerItems.map(item => `
+                      <div class="flex-1 flex items-center justify-center border-r border-black/5 dark:border-white/5 truncate px-0.5">${item.label}</div>
+                    `).join('')}
+                  </div>
+
+                  <!-- 今日垂直标记红线 -->
+                  <div id="gantt-today-vertical-line" class="absolute top-0 bottom-0 z-20 pointer-events-none flex flex-col items-center" style="left: ${timeEngine.todayPct}%;">
+                    <div class="px-1.5 py-0.2 rounded bg-red-600 text-white text-[7px] font-mono font-black shadow -mt-3 whitespace-nowrap animate-pulse flex items-center gap-0.5">
+                      <span>📍</span>
+                      <span>今日</span>
+                    </div>
+                    <div class="w-0.5 h-full border-r-2 border-dashed border-red-500 shadow"></div>
+                  </div>
+
+                  <!-- 右侧条块列：每一行高度与左侧 1:1 完全一致 -->
+                  <div>
+                    ${currentBoss.keyResults.map(kr => {
+                      const krCoords = timeEngine.getCoords(kr.startDate, kr.endDate);
+                      const isExpanded = expandedGanttKrIds[kr.id] !== false;
+
+                      return `
+                        <div class="border-b border-black/5 dark:border-white/5">
+                          <!-- KR 主跑道：高度锁死 h-10 (40px) -->
+                          <div class="h-10 relative flex items-center px-1">
+                            <!-- 背景竖网格线 -->
+                            <div class="absolute inset-0 flex pointer-events-none">
+                              ${timeEngine.headerItems.map(() => `<div class="flex-1 border-r border-black/5 dark:border-white/5 h-full"></div>`).join('')}
+                            </div>
+
+                            <!-- KR 条块 -->
+                            <div onclick="selectGanttKr('${currentBoss.id}', '${kr.id}')" class="absolute h-7 rounded-xl bg-blue-950/30 border border-blue-500/40 overflow-hidden shadow-sm flex items-center cursor-pointer transition-all hover:scale-[1.005] active:scale-95 select-none z-10" style="left: ${krCoords.leftPct}%; width: ${krCoords.widthPct}%;">
+                              <div class="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl transition-all duration-700 opacity-90" style="width: ${kr.progress}%;"></div>
+                              <div class="relative z-10 w-full px-2 flex items-center justify-between text-white drop-shadow">
+                                <span class="text-[8px] font-black truncate max-w-[85%] flex items-center gap-1">
+                                  <span class="font-mono text-[7px] opacity-80">${kr.label}</span>
+                                  <span>${kr.text}</span>
+                                  <span class="text-amber-300 font-mono">(${kr.progress}%)</span>
+                                </span>
+                                ${kr.progress >= 100 ? `<span class="text-[8px] font-black text-emerald-200">✓</span>` : ''}
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- 子任务跑道：每行高度锁死 h-7 (28px) -->
+                          ${isExpanded && kr.tasks.length > 0 ? kr.tasks.map(task => {
+                            const taskCoords = timeEngine.getCoords(task.startDate || kr.startDate, task.endDate || kr.endDate);
+
+                            return `
+                              <div class="h-7 relative flex items-center px-1 border-t border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.01]">
+                                <!-- 背景竖网格线 -->
+                                <div class="absolute inset-0 flex pointer-events-none opacity-40">
+                                  ${timeEngine.headerItems.map(() => `<div class="flex-1 border-r border-black/5 dark:border-white/5 h-full"></div>`).join('')}
+                                </div>
+
+                                <!-- 子任务条块 -->
+                                <div onclick="openTaskRetroModal('${currentBoss.id}', '${kr.id}', '${task.id}')" class="absolute h-4 rounded-md px-1.5 flex items-center gap-1 cursor-pointer select-none text-[7px] font-bold z-10 ${task.done ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 dark:text-emerald-300' : 'glass-inner border border-purple-500/30 text-main-muted hover:border-purple-500'}" style="left: ${taskCoords.leftPct}%; width: ${taskCoords.widthPct}%;">
+                                  <span>${task.done ? '✓' : '◇'}</span>
+                                  <span class="truncate">${task.name}</span>
+                                </div>
+                              </div>
+                            `;
+                          }).join('') : ''}
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 标尺战术作战室 -->
+            ${selectedKr ? `
+              <div class="p-3 rounded-2xl glass-inner space-y-2.5 border border-purple-500/20 transition-all">
+                <div class="flex justify-between items-start pb-1.5 border-b border-black/5 dark:border-white/5">
+                  <div>
+                    <h4 class="text-[11px] font-black text-main-title flex items-center gap-1">
+                      <span class="text-purple-600 dark:text-purple-400">${selectedKr.label} - </span>
+                      <span>${selectedKr.text}</span>
+                    </h4>
+                    <div class="text-[8px] text-main-muted mt-0.5 space-x-2 font-mono flex items-center flex-wrap">
+                      <span>工期: <strong class="text-main-title">${selectedKr.startDate || '待定'} ~ ${selectedKr.endDate || '待定'}</strong></span>
+                      <span class="text-purple-500 font-bold">(${selectedKr.progress}%)</span>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-1">
+                    <button onclick="openEditKrModal('${currentBoss.id}', '${selectedKr.id}')" class="px-2 py-0.5 rounded-lg glass-inner border border-purple-500/30 text-[8px] font-bold text-purple-600 dark:text-purple-400 hover:bg-purple-600/10 active:scale-95">
+                      🛠️ 校准
+                    </button>
+                    <button onclick="openAddTaskModal('${currentBoss.id}', '${selectedKr.id}')" class="px-2 py-0.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-[8px] font-black shadow active:scale-95 transition-all flex items-center gap-1">
+                      <span>+ 排入行动</span>
+                    </button>
+                    <button onclick="toggleTacticalRoom()" class="text-[8px] font-bold text-main-muted hover:text-main-title px-1.5 py-0.5 rounded-lg glass-inner active:scale-95">
+                      ${isTacticalRoomCollapsed ? '▼' : '▲'}
+                    </button>
+                  </div>
+                </div>
+
+                ${!isTacticalRoomCollapsed ? `
+                  <div class="space-y-1.5 pt-0.5">
+                    <div class="flex justify-between items-center text-[8px] font-black text-main-muted">
+                      <span>⚡ 战术行动清单 (${selectedKr.tasks.length} 项)</span>
+                      <span class="text-[7px] text-purple-500">点击打钩 ➔ 复盘存证并传送</span>
+                    </div>
+
+                    ${selectedKr.tasks.length === 0 ? `
+                      <div class="text-[8px] text-main-subtle italic py-2 text-center glass-inner rounded-xl">
+                        暂无排期行动，点击右上角【+ 排入行动】为该标尺设定任务。
+                      </div>
+                    ` : selectedKr.tasks.map(task => `
+                      <div class="p-2 rounded-xl glass-inner flex justify-between items-center transition-all ${task.done ? 'bg-emerald-500/5 opacity-75 border border-emerald-500/20' : 'hover:border-purple-500/30'}">
+                        <div class="flex items-center gap-2 overflow-hidden pr-2">
+                          <input type="checkbox" ${task.done ? 'checked' : ''} onchange="handleTaskCheckbox('${currentBoss.id}', '${selectedKr.id}', '${task.id}', this.checked)" class="accent-purple-600 cursor-pointer w-3.5 h-3.5 shrink-0">
+                          <div class="overflow-hidden">
+                            <div class="flex items-center gap-1">
+                              <span class="text-[7px] px-1 rounded font-bold ${task.priority === 'high' ? 'bg-red-500/10 text-red-500' : task.priority === 'low' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-blue-500/10 text-blue-500'}">
+                                ${task.priority === 'high' ? '关键' : task.priority === 'low' ? '探索' : '常规'}
+                              </span>
+                              <h5 class="text-[10px] font-bold text-main-title truncate ${task.done ? 'line-through text-main-subtle' : ''}">
+                                ${task.name}
+                              </h5>
+                            </div>
+                            <div class="text-[7px] font-mono text-main-subtle flex items-center gap-1.5 mt-0.5">
+                              <span>📅 ${task.startDate ? task.startDate.slice(5) : ''} ~ ${task.endDate ? task.endDate.slice(5) : ''}</span>
+                              ${task.deliverable ? `<span class="text-purple-600 dark:text-purple-400 font-bold truncate max-w-[120px]">📜 ${task.deliverable}</span>` : ''}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center gap-1 shrink-0">
+                          ${task.done ? `
+                            <button onclick="openTaskRetroModal('${currentBoss.id}', '${selectedKr.id}', '${task.id}')" class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[7px] font-bold hover:underline">
+                              存证
+                            </button>
+                          ` : `
+                            <button onclick="openTaskRetroModal('${currentBoss.id}', '${selectedKr.id}', '${task.id}')" class="px-2 py-1 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[7px] font-black active:scale-95 shadow">
+                              达成 ➔
+                            </button>
+                          `}
+                          <button onclick="deleteTaskFromKr('${currentBoss.id}', '${selectedKr.id}', '${task.id}')" class="text-main-subtle hover:text-red-500 text-[10px] px-1">✕</button>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                ` : ''}
+              </div>
+            ` : ''}
+          </section>
+        </div>
+      `;
+    }
+
+    function setInventoryCategory(cat) {
+      appState.inventoryCategory = cat;
+      sound.playTone(550, 'sine', 0.06);
+      renderActiveView();
+    }
+
+    function dismantleAllUnequipped() {
+      const p = appState.player;
+      if (!p.inventory || p.inventory.length === 0) {
+        showToast("百宝行囊中暂无闲置装备", "🎒");
+        return;
+      }
+      const count = p.inventory.length;
+      const pointsGain = count * 2;
+      p.statPoints += pointsGain;
+      p.inventory = [];
+      sound.playCoin();
+      triggerHaptic([60, 40, 80]);
+      saveState();
+      updateTopBar();
+      renderActiveView();
+      showToast(`已一键分解 ${count} 件装备，获得 +${pointsGain} 💎 潜能！`, "✨");
+    }
+
+    function renderCharacterView() {
+      const p = appState.player;
+      const equipmentBonuses = { cognition: 0, discipline: 0, vitality: 0, capital: 0, bond: 0 };
+      if (p.equipped) {
+        Object.values(p.equipped).forEach(item => {
+          if (item && item.stat && item.boost && equipmentBonuses[item.stat] !== undefined) {
+            equipmentBonuses[item.stat] = (equipmentBonuses[item.stat] || 0) + item.boost;
+          }
+        });
+      }
+
+      const curCategory = appState.inventoryCategory || 'all';
+      const filteredInventory = (p.inventory || []).filter(item => {
+        if (curCategory === 'all') return true;
+        return item.slot === curCategory;
+      });
+
+      return `
+        <section class="space-y-3.5">
+          <!-- 3D 元神法相画布 -->
+          <div class="glass-panel rounded-3xl p-4 space-y-2.5 relative overflow-hidden border border-purple-500/20">
+            <div class="flex justify-between items-center px-1">
+              <div>
+                <span class="text-[8px] font-black uppercase text-purple-600 dark:text-purple-400 tracking-widest">Astral Sanctuary</span>
+                <h3 class="text-xs font-black text-main-title flex items-center gap-1.5 mt-0.5">
+                  <span>🐉</span> 3D 本命法相
+                </h3>
+              </div>
+              <span class="text-[8px] text-main-subtle font-mono font-bold">可指尖拖拽旋转</span>
+            </div>
+
+            <div id="beast-3d-canvas" class="w-full h-44 rounded-2xl flex items-center justify-center cursor-grab active:cursor-grabbing overflow-hidden"></div>
+
+            <div class="p-2.5 rounded-xl glass-inner space-y-1">
+              <div class="flex justify-between items-center text-[9px] font-mono font-bold">
+                <span class="text-main-muted">修为进阶 (EXP)</span>
+                <span class="text-purple-600 dark:text-purple-400 font-black">${p.exp} / ${p.nextLevelExp}</span>
+              </div>
+              <div class="h-1.5 w-full bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full transition-all duration-500" style="width: ${Math.min(100, Math.round((p.exp / p.nextLevelExp) * 100))}%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 随身神装槽位 -->
+          <div class="glass-panel rounded-3xl p-3.5 space-y-2.5 border border-purple-500/20">
+            <div class="flex justify-between items-center px-1">
+              <span class="text-xs font-black text-main-title flex items-center gap-1.5">
+                <span>🛡️</span> 随身神装 (点击穿脱)
+              </span>
+              <span class="text-[8px] text-amber-500 font-bold">属性实时加成</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+              <div onclick="${p.equipped.weapon ? `inspectItem('${p.equipped.weapon.id}', 'equipped')` : ''}" class="p-2 rounded-xl glass-inner border border-purple-500/20 flex flex-col items-center gap-1 cursor-pointer hover:border-purple-500/50 transition-all text-center">
+                <span class="text-[9px] text-main-subtle font-bold">神器</span>
+                <div class="text-xl">${p.equipped.weapon ? '⚔️' : '🔘'}</div>
+                <div class="text-[9px] font-black text-main-title truncate w-full">${p.equipped.weapon ? p.equipped.weapon.name : '未装备'}</div>
+                <span class="text-[7px] font-mono text-purple-600 dark:text-purple-400 font-bold">${p.equipped.weapon ? `+${p.equipped.weapon.boost}` : '空槽位'}</span>
+              </div>
+
+              <div onclick="${p.equipped.armor ? `inspectItem('${p.equipped.armor.id}', 'equipped')` : ''}" class="p-2 rounded-xl glass-inner border border-purple-500/20 flex flex-col items-center gap-1 cursor-pointer hover:border-purple-500/50 transition-all text-center">
+                <span class="text-[9px] text-main-subtle font-bold">战甲</span>
+                <div class="text-xl">${p.equipped.armor ? '🛡️' : '🔘'}</div>
+                <div class="text-[9px] font-black text-main-title truncate w-full">${p.equipped.armor ? p.equipped.armor.name : '未装备'}</div>
+                <span class="text-[7px] font-mono text-purple-600 dark:text-purple-400 font-bold">${p.equipped.armor ? `+${p.equipped.armor.boost}` : '空槽位'}</span>
+              </div>
+
+              <div onclick="${p.equipped.relic ? `inspectItem('${p.equipped.relic.id}', 'equipped')` : ''}" class="p-2 rounded-xl glass-inner border border-purple-500/20 flex flex-col items-center gap-1 cursor-pointer hover:border-purple-500/50 transition-all text-center">
+                <span class="text-[9px] text-main-subtle font-bold">圣物</span>
+                <div class="text-xl">${p.equipped.relic ? '🔮' : '🔘'}</div>
+                <div class="text-[9px] font-black text-main-title truncate w-full">${p.equipped.relic ? p.equipped.relic.name : '未装备'}</div>
+                <span class="text-[7px] font-mono text-purple-600 dark:text-purple-400 font-bold">${p.equipped.relic ? `+${p.equipped.relic.boost}` : '空槽位'}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 百宝行囊 -->
+          <div class="glass-panel rounded-3xl p-3.5 space-y-2.5 border border-purple-500/20">
+            <div class="flex justify-between items-center px-1">
+              <span class="text-xs font-black text-main-title flex items-center gap-1.5">
+                <span>🎒</span> 百宝行囊 (${(p.inventory || []).length})
+              </span>
+              <button onclick="dismantleAllUnequipped()" class="px-2 py-0.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 text-[8px] font-black active:scale-95 transition-all">
+                💥 一键分解闲置
+              </button>
+            </div>
+
+            <!-- 分类标签 -->
+            <div class="flex gap-1 p-1 rounded-xl glass-inner">
+              <button onclick="setInventoryCategory('all')" class="flex-1 py-0.5 text-[8px] font-black rounded-lg transition-all ${curCategory === 'all' ? 'bg-purple-600 text-white' : 'text-main-muted'}">
+                全部 (${(p.inventory || []).length})
+              </button>
+              <button onclick="setInventoryCategory('weapon')" class="flex-1 py-0.5 text-[8px] font-black rounded-lg transition-all ${curCategory === 'weapon' ? 'bg-purple-600 text-white' : 'text-main-muted'}">
+                ⚔️ 神器 (${(p.inventory || []).filter(i => i.slot === 'weapon').length})
+              </button>
+              <button onclick="setInventoryCategory('armor')" class="flex-1 py-0.5 text-[8px] font-black rounded-lg transition-all ${curCategory === 'armor' ? 'bg-purple-600 text-white' : 'text-main-muted'}">
+                🛡️ 战甲 (${(p.inventory || []).filter(i => i.slot === 'armor').length})
+              </button>
+              <button onclick="setInventoryCategory('relic')" class="flex-1 py-0.5 text-[8px] font-black rounded-lg transition-all ${curCategory === 'relic' ? 'bg-purple-600 text-white' : 'text-main-muted'}">
+                🔮 圣物 (${(p.inventory || []).filter(i => i.slot === 'relic').length})
+              </button>
+            </div>
+
+            ${filteredInventory.length === 0 ? `
+              <div class="text-[9px] text-main-subtle italic py-3 text-center glass-inner rounded-xl">
+                该分类下暂无装备，在前线斩杀怪兽将自动爆落存入！
+              </div>
+            ` : `
+              <div class="grid grid-cols-2 gap-2">
+                ${filteredInventory.map(item => `
+                  <div onclick="inspectItem('${item.id}', 'inventory')" class="p-2 rounded-xl glass-inner border border-purple-500/20 hover:border-purple-500/50 cursor-pointer flex items-center justify-between transition-all">
+                    <div class="flex items-center gap-1.5 overflow-hidden">
+                      <span class="text-base">${item.slot === 'weapon' ? '⚔️' : item.slot === 'armor' ? '🛡️' : '🔮'}</span>
+                      <div class="overflow-hidden">
+                        <div class="text-[10px] font-black text-main-title truncate">${item.name}</div>
+                        <span class="text-[7px] font-mono text-purple-600 dark:text-purple-400 font-bold">+${item.boost} ${STAT_CONFIG[item.stat]?.name || ''}</span>
+                      </div>
+                    </div>
+                    <span class="text-[7px] font-black px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-500 shrink-0">${item.rarity}</span>
+                  </div>
+                `).join('')}
+              </div>
+            `}
+          </div>
+
+          <!-- 现实五维矩阵 -->
+          <div class="glass-panel rounded-3xl p-3.5 space-y-2.5 border border-purple-500/20">
+            <div class="flex justify-between items-center px-1">
+              <span class="text-xs font-black text-main-title flex items-center gap-1.5">
+                <span>🧠</span> 现实五维矩阵 (含神装加成)
+              </span>
+              <span class="text-purple-600 dark:text-purple-400 font-mono text-[10px] font-black">潜能: ${p.statPoints} 💎</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              ${['cognition', 'discipline', 'vitality', 'capital', 'bond'].map(key => {
+                const baseVal = p.stats[key] || 5.0;
+                const bonus = equipmentBonuses[key] || 0;
+                const totalVal = (baseVal + bonus).toFixed(1);
+
+                return `
+                  <div class="p-2 rounded-xl glass-inner flex justify-between items-center">
+                    <div>
+                      <div class="flex items-center gap-1">
+                        <span class="text-xs">${STAT_CONFIG[key].icon}</span>
+                        <span class="text-[9px] font-black text-main-title">${STAT_CONFIG[key].name}</span>
+                      </div>
+                      <div class="flex items-baseline gap-1 mt-0.5">
+                        <span class="text-xs font-mono font-black ${STAT_CONFIG[key].color}">${totalVal}</span>
+                        ${bonus > 0 ? `<span class="text-[7px] text-purple-500 font-mono font-bold">(+${bonus.toFixed(1)})</span>` : ''}
+                      </div>
+                    </div>
+                    ${p.statPoints > 0 ? `
+                      <button onclick="allocateStat('${key}')" class="w-5 h-5 rounded-lg bg-purple-600 text-white font-bold text-[10px] flex items-center justify-center active:scale-90 shadow" title="消耗 1 潜能加点">
+                        +
+                      </button>
+                    ` : ''}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderTreasuryView() {
+      return `
+        <section class="glass-panel rounded-3xl p-4 space-y-3.5">
+          <div class="p-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-700 text-white shadow flex justify-between items-center">
+            <div>
+              <span class="text-[8px] uppercase tracking-widest font-black opacity-75">Divine Treasury</span>
+              <h3 class="text-lg font-black mt-0.5">可用潜能: ${appState.player.statPoints} 💎</h3>
+              <p class="text-[8px] opacity-80 mt-0.5">每一枚点数均来自攻坚汗水，无负罪享受生活！</p>
+            </div>
+            <span class="text-3xl opacity-40">💎</span>
+          </div>
+
+          <div class="flex justify-between items-center px-1">
+            <span class="text-xs font-black text-main-title uppercase">欲望犒赏清单</span>
+            <button onclick="toggleModal('add-reward-modal')" class="px-2 py-0.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-[8px] font-black active:scale-95 transition-all flex items-center gap-1">
+              <span>+</span> 新建愿望
+            </button>
+          </div>
+
+          <div class="space-y-2">
+            ${appState.treasury.map(r => `
+              <div class="glass-panel rounded-2xl p-2.5 flex justify-between items-center">
+                <div class="flex items-center gap-2.5">
+                  <span class="text-xl">${r.icon}</span>
+                  <div>
+                    <h5 class="text-[11px] font-black text-main-title">${r.title}</h5>
+                    <span class="text-[8px] text-main-subtle font-mono">消耗: ${r.cost} 潜能点</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                  <button onclick="deleteReward(${r.id})" class="p-1.5 text-main-subtle hover:text-red-500 active:scale-90 text-[10px]" title="移出宝阁">
+                    🗑️
+                  </button>
+                  <button onclick="redeemReward(${r.id})" class="px-3 py-1 rounded-xl text-[10px] font-black ${appState.player.statPoints >= r.cost ? 'bg-purple-600 text-white active:scale-95 shadow' : 'glass-inner text-main-subtle opacity-50 cursor-not-allowed'}">
+                    兑换
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderActiveView() {
+      const container = document.getElementById('view-container');
+      if (!container) return;
+      if (appState.activeTab === 'home') {
+        container.innerHTML = renderHomeView();
+        setTimeout(initBeast3D, 60);
+      } else if (appState.activeTab === 'battle') {
+        container.innerHTML = renderBattleView();
+      } else if (appState.activeTab === 'okr') {
+        container.innerHTML = renderOkrView();
+      } else if (appState.activeTab === 'character') {
+        container.innerHTML = renderCharacterView();
+        setTimeout(initBeast3D, 60);
+      } else if (appState.activeTab === 'treasury') {
+        container.innerHTML = renderTreasuryView();
+      }
+    }
+
+    function switchTab(tabKey) {
+      appState.activeTab = tabKey;
+      sound.playEquip();
+      triggerHaptic([25]);
+
+      ['home', 'battle', 'okr', 'character', 'treasury'].forEach(key => {
+        const btn = document.getElementById('tab-btn-' + key);
+        if (!btn) return;
+        if (key === tabKey) {
+          btn.className = "relative py-2 px-3 rounded-2xl flex flex-col items-center gap-0.5 transition-all text-purple-600 dark:text-purple-400 font-black scale-105";
+        } else {
+          btn.className = "relative py-2 px-3 rounded-2xl flex flex-col items-center gap-0.5 transition-all text-main-subtle";
+        }
+      });
+
+      saveState();
+      renderActiveView();
+    }
+
+    function requestArchiveBoss(bossId) {
+      const boss = appState.bosses.find(b => b.id === bossId);
+      if (!boss) return;
+      document.getElementById('archive-confirm-boss-id').value = bossId;
+      toggleModal('archive-confirm-modal');
+    }
+
+    function executeArchiveBoss() {
+      const bossId = document.getElementById('archive-confirm-boss-id').value;
+      const boss = appState.bosses.find(b => b.id === bossId);
+      if (!boss) return;
+
+      boss.isArchived = true;
+      const remainingActive = appState.bosses.filter(b => !b.isArchived);
+      appState.activeBossId = remainingActive.length > 0 ? remainingActive[0].id : '';
+      appState.okrViewMode = 'dashboard'; // 归档后优雅切回大盘模式
+
+      sound.playEquip();
+      triggerHaptic([30, 50]);
+      saveState();
+      toggleModal('archive-confirm-modal');
+      renderActiveView();
+      showToast(`战役【${boss.title}】已归档至战史总谱中！`, "📦");
+    }
+
+    // 智能双向任务复选框处理器
+    function handleTaskCheckbox(bossId, krId, taskId, isChecked) {
+      const boss = appState.bosses.find(b => b.id === bossId);
+      if (!boss) return;
+      const kr = boss.keyResults.find(k => k.id === krId);
+      if (!kr) return;
+      const task = kr.tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      if (isChecked) {
+        // 打开成果存证与复盘弹窗
+        openTaskRetroModal(bossId, krId, taskId);
+      } else {
+        // 用户主动取消打钩，恢复为未完成状态并重算进度
+        task.done = false;
+        task.completedAt = null;
+        const doneCount = kr.tasks.filter(t => t.done).length;
+        kr.progress = kr.tasks.length > 0 ? Math.round((doneCount / kr.tasks.length) * 100) : 0;
+        recalculateBossHp(boss);
+        sound.playTone(400, 'sawtooth', 0.08);
+        saveState();
+        renderActiveView();
+        showToast(`已将【${task.name}】重置为推进中`, "↩️");
+      }
+    }
+
+    let currentInspectItem = null;
+    let currentInspectSource = null;
+    function inspectItem(itemId, source) {
+      const p = appState.player;
+      let item = null;
+      if (source === 'equipped') {
+        item = Object.values(p.equipped).find(x => x && x.id === itemId);
+      } else {
+        item = (p.inventory || []).find(x => x && x.id === itemId);
+      }
+      if (!item) return;
+      currentInspectItem = item;
+      currentInspectSource = source;
+      document.getElementById('inspect-item-icon').innerText = item.slot === 'weapon' ? '⚔️' : item.slot === 'armor' ? '🛡️' : '🔮';
+      document.getElementById('inspect-item-rarity').innerText = item.rarity;
+      document.getElementById('inspect-item-name').innerText = item.name;
+      document.getElementById('inspect-item-desc').innerText = item.desc || '神装附魔装备';
+      document.getElementById('inspect-stat-box').innerHTML = `
+        <span class="text-purple-500 font-black">${STAT_CONFIG[item.stat]?.name || item.stat} +${item.boost}</span>
+        <span class="text-main-muted font-bold">部位: ${item.slot === 'weapon' ? '神器' : item.slot === 'armor' ? '战甲' : '圣物'}</span>
+      `;
+      const actionBtn = document.getElementById('inspect-action-btn');
+      if (source === 'equipped') {
+        actionBtn.innerText = "卸下至行囊";
+        actionBtn.className = "w-full py-2 bg-slate-600 hover:bg-slate-500 text-white font-black text-xs rounded-xl shadow active:scale-95 transition-all";
+      } else {
+        actionBtn.innerText = "立即装备";
+        actionBtn.className = "w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-xs rounded-xl shadow active:scale-95 transition-all";
+      }
+      toggleModal('equipment-inspect-modal');
+    }
+
+    function executeInspectAction() {
+      if (!currentInspectItem) return;
+      const p = appState.player;
+      const slot = currentInspectItem.slot;
+      if (currentInspectSource === 'equipped') {
+        p.inventory.push(currentInspectItem);
+        p.equipped[slot] = null;
+        showToast(`已卸下【${currentInspectItem.name}】`, "📦");
+      } else {
+        if (p.equipped[slot]) {
+          p.inventory.push(p.equipped[slot]);
+        }
+        p.inventory = p.inventory.filter(i => i.id !== currentInspectItem.id);
+        p.equipped[slot] = currentInspectItem;
+        showToast(`已装备【${currentInspectItem.name}】！`, "🛡️");
+      }
+      sound.playEquip();
+      saveState();
+      toggleModal('equipment-inspect-modal');
+      updateTopBar();
+      renderActiveView();
+    }
+
+    function dismantleInspectItem() {
+      if (!currentInspectItem) return;
+      const p = appState.player;
+      if (currentInspectSource === 'equipped') {
+        p.equipped[currentInspectItem.slot] = null;
+      } else {
+        p.inventory = p.inventory.filter(i => i.id !== currentInspectItem.id);
+      }
+      p.statPoints += 2;
+      sound.playCoin();
+      saveState();
+      toggleModal('equipment-inspect-modal');
+      updateTopBar();
+      renderActiveView();
+      showToast("已分解神装，获得 +2 💎 潜能点！", "✨");
+    }
+
+    function openScoreModal(bossId) {
+      const boss = appState.bosses.find(b => b.id === bossId);
+      if (!boss) return;
+      document.getElementById('scoring-boss-id').value = bossId;
+      const currentScore = boss.score !== undefined ? boss.score : 100;
+      document.getElementById('scoring-range').value = currentScore;
+      updateScoreDisplay(currentScore);
+      document.getElementById('scoring-notes').value = boss.scoreNotes || "";
+      toggleModal('score-okr-modal');
+    }
+
+    function updateScoreDisplay(val) {
+      const num = parseInt(val) || 0;
+      let evalText = "未启动";
+      if (num >= 110) evalText = "卓越突破 (>=110)";
+      else if (num >= 100) evalText = "标杆达成 (100)";
+      else if (num >= 60) evalText = "基本及格 (60-90)";
+      else evalText = "攻坚受阻 (<60)";
+      const el = document.getElementById('score-val-display');
+      if (el) el.innerText = `${num} 分 (${evalText})`;
+    }
+
+    function submitScoreOkr() {
+      const bossId = document.getElementById('scoring-boss-id').value;
+      const boss = appState.bosses.find(b => b.id === bossId);
+      if (!boss) return;
+      const score = parseInt(document.getElementById('scoring-range').value) || 0;
+      const notes = document.getElementById('scoring-notes').value.trim();
+      boss.score = score;
+      boss.scoreNotes = notes;
+      if (score >= 100) {
+        appState.player.statPoints += 4;
+        showToast("自评达成标杆 (>=100分)！奖励 +4 💎 潜能！", "🏆");
+      } else {
+        showToast("战役自评已封存！", "📜");
+      }
+      sound.playEquip();
+      saveState();
+      toggleModal('score-okr-modal');
+      updateTopBar();
+      renderActiveView();
+    }
+
+    function allocateStat(key) {
+      if (appState.player.statPoints <= 0) {
+        showToast("潜能点数不足", "⚠️");
+        return;
+      }
+      appState.player.statPoints -= 1;
+      appState.player.stats[key] = parseFloat(((appState.player.stats[key] || 5.0) + 1.0).toFixed(1));
+      sound.playCoin();
+      triggerHaptic([30]);
+      saveState();
+      updateTopBar();
+      renderActiveView();
+      showToast(`【${STAT_CONFIG[key]?.name || key}】提升 +1.0！`, "💪");
+    }
+
+    function submitAddReward() {
+      const title = document.getElementById('new-reward-title').value.trim();
+      const cost = parseInt(document.getElementById('new-reward-cost').value) || 3;
+      const icon = document.getElementById('new-reward-icon').value.trim() || "🎁";
+      if (!title) {
+        showToast("请输入奖励名称", "⚠️");
+        return;
+      }
+      appState.treasury.push({ id: Date.now(), title, cost, icon, desc: "自定义犒赏" });
+      sound.playEquip();
+      saveState();
+      toggleModal('add-reward-modal');
+      renderActiveView();
+      showToast("新愿望已封入欲望宝阁！", "🎁");
+    }
+
+    function deleteReward(id) {
+      appState.treasury = appState.treasury.filter(r => r.id !== id);
+      sound.playTone(400, 'sawtooth', 0.1);
+      saveState();
+      renderActiveView();
+      showToast("已移出该愿望", "🗑️");
+    }
+
+    function redeemReward(id) {
+      const reward = appState.treasury.find(r => r.id === id);
+      if (!reward) return;
+      if (appState.player.statPoints < reward.cost) {
+        showToast("潜能点不足，快去前线斩杀怪兽与攻坚！", "🔒");
+        sound.playTone(200, 'sawtooth', 0.15);
+        return;
+      }
+      appState.player.statPoints -= reward.cost;
+      sound.playCoin();
+      triggerHaptic([60, 60]);
+      saveState();
+      updateTopBar();
+      renderActiveView();
+      showToast(`成功兑换【${reward.title}】！无负罪享受生活！`, "🎉");
+    }
+
+    function openEditKrModal(bossId, krId) {
+      const boss = appState.bosses.find(b => b.id === bossId);
+      if (!boss) return;
+      const kr = boss.keyResults.find(k => k.id === krId);
+      if (!kr) return;
+
+      document.getElementById('edit-kr-boss-id').value = bossId;
+      document.getElementById('edit-kr-id').value = krId;
+      document.getElementById('edit-kr-text').value = kr.text;
+      document.getElementById('edit-kr-stat').value = kr.stat || 'none';
+      document.getElementById('edit-kr-progress').value = kr.progress || 0;
+      document.getElementById('edit-kr-start').value = kr.startDate || boss.startDate;
+      document.getElementById('edit-kr-end').value = kr.endDate || boss.endDate;
+
+      toggleModal('edit-kr-modal');
+    }
+
+    function submitEditKr() {
+      const bossId = document.getElementById('edit-kr-boss-id').value;
+      const krId = document.getElementById('edit-kr-id').value;
+      const text = document.getElementById('edit-kr-text').value.trim();
+      const stat = document.getElementById('edit-kr-stat').value;
+      const progress = Math.min(100, Math.max(0, parseInt(document.getElementById('edit-kr-progress').value) || 0));
+      const startDate = document.getElementById('edit-kr-start').value;
+      const endDate = document.getElementById('edit-kr-end').value;
+
+      if (!text) {
+        showToast("标尺描述不能为空", "⚠️");
+        return;
+      }
+
+      const boss = appState.bosses.find(b => b.id === bossId);
+      if (!boss) return;
+      const kr = boss.keyResults.find(k => k.id === krId);
+      if (!kr) return;
+
+      kr.text = text;
+      kr.stat = stat;
+      kr.progress = progress;
+      kr.startDate = startDate;
+      kr.endDate = endDate;
+
+      recalculateBossHp(boss);
+      sound.playEquip();
+      saveState();
+      toggleModal('edit-kr-modal');
+      renderActiveView();
+      showToast("标尺配置与工期已更新", "🛠️");
+    }
+
+    function deleteKrFromBoss() {
+      const bossId = document.getElementById('edit-kr-boss-id').value;
+      const krId = document.getElementById('edit-kr-id').value;
+      const boss = appState.bosses.find(b => b.id === bossId);
+      if (!boss) return;
+
+      if (boss.keyResults.length <= 1) {
+        showToast("至少需保留一项关键结果标尺", "⚠️");
+        return;
+      }
+
+      boss.keyResults = boss.keyResults.filter(k => k.id !== krId);
+      if (appState.selectedKrIdByBoss[bossId] === krId) {
+        appState.selectedKrIdByBoss[bossId] = boss.keyResults[0].id;
+      }
+
+      recalculateBossHp(boss);
+      sound.playTone(320, 'sawtooth', 0.12);
+      saveState();
+      toggleModal('edit-kr-modal');
+      renderActiveView();
+      showToast("已移除该标尺", "🗑️");
+    }
+
+    function recalculateBossHp(boss) {
+      if (!boss.keyResults || boss.keyResults.length === 0) return;
+      const totalProgress = boss.keyResults.reduce((acc, k) => acc + (k.progress || 0), 0);
+      const avgProgress = totalProgress / boss.keyResults.length;
+      boss.currentHp = Math.max(0, Math.round(boss.maxHp * (1 - avgProgress / 100)));
+    }
+
+    function openTaskRetroModal(bossId, krId, taskId) {
+      const boss = appState.bosses.find(b => b.id === bossId);
+      if (!boss) return;
+      const kr = boss.keyResults.find(k => k.id === krId);
+      if (!kr) return;
+      const task = kr.tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      document.getElementById('retro-boss-id').value = bossId;
+      document.getElementById('retro-kr-id').value = krId;
+      document.getElementById('retro-task-id').value = taskId;
+      document.getElementById('retro-is-already-done').value = task.done ? 'true' : 'false';
+
+      document.getElementById('retro-task-name-display').innerText = `【${kr.label}】▸ ${task.name}`;
+      document.getElementById('retro-deliverable').value = task.deliverable || "";
+      document.getElementById('retro-insights').value = task.retro || "";
+      document.getElementById('retro-next-action-text').value = task.nextStep || "";
+
+      document.getElementById('retro-next-start-date').value = getTodayDateStr();
+      document.getElementById('retro-next-end-date').value = getFutureDateStr(7);
+
+      document.querySelector('input[name="retro-next-choice"][value="spawn"]').checked = true;
+      toggleNextActionInput(true);
+
+      toggleModal('task-retro-modal');
+    }
+
+    function quickFlashCheck() {
+      document.getElementById('retro-deliverable').value = "极速打卡：任务已按期闭环交付";
+      document.getElementById('retro-insights').value = "高效心流推进，节奏良好";
+      document.querySelector('input[name="retro-next-choice"][value="done"]').checked = true;
+      toggleNextActionInput(false);
+      submitTaskRetro();
+    }
+
+    function insertRetroTag(tag) {
+      const el = document.getElementById('retro-insights');
+      if (!el) return;
+      el.value = el.value ? `${el.value}；${tag}` : tag;
+    }
+
+    function toggleNextActionInput(isSpawn) {
+      const box = document.getElementById('retro-next-input-box');
+      if (box) box.style.display = isSpawn ? 'block' : 'none';
+    }
+
+    function submitTaskRetro() {
+      const bossId = document.getElementById('retro-boss-id').value;
+      const krId = document.getElementById('retro-kr-id').value;
+      const taskId = document.getElementById('retro-task-id').value;
+      const isAlreadyDone = document.getElementById('retro-is-already-done').value === 'true';
+
+      const deliverable = document.getElementById('retro-deliverable').value.trim();
+      const insights = document.getElementById('retro-insights').value.trim();
+      const choice = document.querySelector('input[name="retro-next-choice"]:checked').value;
+      const nextActionText = document.getElementById('retro-next-action-text').value.trim();
+      const nextStartDate = document.getElementById('retro-next-start-date').value || getTodayDateStr();
+      const nextEndDate = document.getElementById('retro-next-end-date').value || getFutureDateStr(7);
+
+      const boss = appState.bosses.find(b => b.id === bossId);
+      if (!boss) return;
+      const kr = boss.keyResults.find(k => k.id === krId);
+      if (!kr) return;
+      const task = kr.tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      task.deliverable = deliverable || "已达成阶段成果存证";
+      task.retro = insights || "阶段推进质量达标";
+      task.nextStep = nextActionText;
+
+      if (!isAlreadyDone) {
+        task.done = true;
+        task.completedAt = new Date().toLocaleDateString().slice(5) + " " + new Date().toLocaleTimeString().slice(0, 5);
+
+        boss.deliverables.unshift({
+          time: task.completedAt,
+          text: `【${kr.label}】${task.name} ➔ ${task.deliverable}`,
+          krId: kr.id,
+          insights: task.retro
+        });
+
+        const doneCount = kr.tasks.filter(t => t.done).length;
+        kr.progress = Math.round((doneCount / kr.tasks.length) * 100);
+        recalculateBossHp(boss);
+
+        appState.encounters.unshift({
+          id: 'mob_' + Date.now(),
+          name: `战果破盾·${task.name}`,
+          type: 'elite',
+          tier: '战备',
+          mainStat: kr.stat,
+          hp: 200,
+          maxHp: 200,
+          exp: 150,
+          rageGain: 35,
+          icon: '⚔️',
+          deliverableNote: `【已存证待斩杀】${task.deliverable}`,
+          linkedKrId: kr.id,
+          isFromOkrDispatch: true
+        });
+
+        sound.playEquip();
+        triggerHaptic([40, 60]);
+        showToast("成果存证入账！战备怪兽已送达【山海征途】！", "⚔️");
+      }
+
+      if (choice === 'spawn' && nextActionText) {
+        kr.tasks.push({
+          id: 'task_' + Date.now(),
+          name: nextActionText,
+          priority: 'normal',
+          startDate: nextStartDate,
+          endDate: nextEndDate,
+          done: false,
+          deliverable: "",
+          retro: "",
+          nextStep: "",
+          completedAt: null
+        });
+
+        const doneCount = kr.tasks.filter(t => t.done).length;
+        kr.progress = Math.round((doneCount / kr.tasks.length) * 100);
+        recalculateBossHp(boss);
+      }
+
+      saveState();
+      toggleModal('task-retro-modal');
+      updateTopBar();
+      renderActiveView();
+    }
+
+    function openAddTaskModal(bossId, krId) {
+      const boss = appState.bosses.find(b => b.id === bossId);
+      if (!boss) return;
+      const kr = boss.keyResults.find(k => k.id === krId);
+      if (!kr) return;
+
+      document.getElementById('add-task-boss-id').value = bossId;
+      document.getElementById('add-task-kr-id').value = krId;
+      document.getElementById('add-task-name-input').value = "";
+      document.getElementById('add-task-start-input').value = getTodayDateStr();
+      document.getElementById('add-task-end-input').value = kr.endDate || getFutureDateStr(14);
+
+      toggleModal('add-task-modal');
+    }
+
+    function submitAddTaskToKr() {
+      const bossId = document.getElementById('add-task-boss-id').value;
+      const krId = document.getElementById('add-task-kr-id').value;
+      const taskName = document.getElementById('add-task-name-input').value.trim();
+      const priority = document.getElementById('add-task-priority-input').value || 'normal';
+      const startDate = document.getElementById('add-task-start-input').value || getTodayDateStr();
+      const endDate = document.getElementById('add-task-end-input').value || getFutureDateStr(7);
+
+      if (!taskName) {
+        showToast("请输入战术行动名称", "⚠️");
+        return;
+      }
+
+      const boss = appState.bosses.find(b => b.id === bossId);
+      if (!boss) return;
+      const kr = boss.keyResults.find(k => k.id === krId);
+      if (!kr) return;
+
+      kr.tasks.push({
+        id: 'task_' + Date.now(),
+        name: taskName,
+        priority: priority,
+        startDate: startDate,
+        endDate: endDate,
+        done: false,
+        deliverable: "",
+        retro: "",
+        nextStep: "",
+        completedAt: null
+      });
+
+      const doneCount = kr.tasks.filter(t => t.done).length;
+      kr.progress = Math.round((doneCount / kr.tasks.length) * 100);
+      recalculateBossHp(boss);
+
+      saveState();
+      sound.playEquip();
+      toggleModal('add-task-modal');
+      renderActiveView();
+      showToast(`行动已锚定工期 [${startDate} ~ ${endDate}]！`, "⚡");
+    }
+
+    function deleteTaskFromKr(bossId, krId, taskId) {
+      const boss = appState.bosses.find(b => b.id === bossId);
+      if (!boss) return;
+      const kr = boss.keyResults.find(k => k.id === krId);
+      if (!kr) return;
+
+      kr.tasks = kr.tasks.filter(t => t.id !== taskId);
+      const doneCount = kr.tasks.filter(t => t.done).length;
+      kr.progress = kr.tasks.length > 0 ? Math.round((doneCount / kr.tasks.length) * 100) : 0;
+      recalculateBossHp(boss);
+
+      saveState();
+      renderActiveView();
+      showToast("已移除该行动项", "🗑️");
+    }
+
+    function exportOkrToExcel() {
+      let csv = "\uFEFF";
+      csv += "战役目标 (Objective),攻坚周期,战役状态,120分制自评,关键标尺 (Key Result),标尺进度,标尺工期,行动项名称,行动工期,是否闭环,交付物存证凭据,复盘洞察\n";
+
+      appState.bosses.forEach(boss => {
+        const bossTitle = `"${(boss.title || '').replace(/"/g, '""')}"`;
+        const quarter = `"${(boss.quarter || '').replace(/"/g, '""')}"`;
+        const status = boss.isArchived ? "已归档" : "活跃攻坚中";
+        const score = boss.score !== undefined ? boss.score : 100;
+
+        (boss.keyResults || []).forEach(kr => {
+          const krText = `"${(kr.text || '').replace(/"/g, '""')}"`;
+          const krProgress = `${kr.progress || 0}%`;
+          const krSpan = `"${kr.startDate || ''} ~ ${kr.endDate || ''}"`;
+
+          if (kr.tasks && kr.tasks.length > 0) {
+            kr.tasks.forEach(t => {
+              const tName = `"${(t.name || '').replace(/"/g, '""')}"`;
+              const tSpan = `"${t.startDate || ''} ~ ${t.endDate || ''}"`;
+              const tDone = t.done ? "已完成" : "进行中";
+              const deliverable = `"${(t.deliverable || '').replace(/\r?\n/g, ' ').replace(/"/g, '""')}"`;
+              const retro = `"${(t.retro || '').replace(/\r?\n/g, ' ').replace(/"/g, '""')}"`;
+              csv += `${bossTitle},${quarter},${status},${score},${krText},${krProgress},${krSpan},${tName},${tSpan},${tDone},${deliverable},${retro}\n`;
+            });
+          } else {
+            csv += `${bossTitle},${quarter},${status},${score},${krText},${krProgress},${krSpan},"无任务","-","-","-","-"\n`;
+          }
+        });
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `人生升级系统_全量战史档案_${Date.now()}.csv`;
+      a.click();
+      showToast("已成功导出规范化 Excel 战史报表！", "📥");
+    }
+
+    function toggleModal(modalId) {
+      const el = document.getElementById(modalId);
+      if (!el) return;
+      el.classList.toggle('hidden');
+    }
+
+    function updateTopBar() {
+      const p = appState.player;
+      document.getElementById('top-level-badge').innerText = p.level;
+      document.getElementById('top-player-name').innerText = p.name;
+      document.getElementById('top-exp-label').innerText = `EXP ${p.exp} / ${p.nextLevelExp}`;
+      document.getElementById('top-points-display').innerText = p.statPoints;
+
+      const titles = ["破壳幼境", "开光灵裔", "筑基天兽", "巡星领域", "太虚苍龙"];
+      const titleIdx = Math.min(Math.floor((p.level - 1) / 5), titles.length - 1);
+      document.getElementById('top-title-tag').innerText = titles[titleIdx];
+
+      const battleBadge = document.getElementById('nav-battle-badge');
+      if (battleBadge) {
+        if (appState.encounters.length > 0) {
+          battleBadge.innerText = appState.encounters.length;
+          battleBadge.classList.remove('hidden');
+        } else {
+          battleBadge.classList.add('hidden');
+        }
+      }
+
+      updateTimeProgressPillars();
+    }
+
+    function updateTimeProgressPillars() {
+      const now = new Date();
+      document.getElementById('time-now-label').innerText = now.getFullYear() + " 时光";
+
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const dayPct = Math.min(100, Math.max(0, Math.round(((now.getTime() - startOfDay) / (24 * 3600 * 1000)) * 100)));
+      document.getElementById('time-day-pct').innerText = dayPct + "%";
+      document.getElementById('time-day-bar').style.width = dayPct + "%";
+
+      const startOfYear = new Date(now.getFullYear(), 0, 1).getTime();
+      const endOfYear = new Date(now.getFullYear() + 1, 0, 1).getTime();
+      const yearPct = Math.min(100, Math.max(0, Math.round(((now.getTime() - startOfYear) / (endOfYear - startOfYear)) * 100)));
+      document.getElementById('time-year-pct').innerText = yearPct + "%";
+      document.getElementById('time-year-bar').style.width = yearPct + "%";
+
+      const currentAge = now.getFullYear() - (appState.player.birthYear || 2000);
+      const targetAge = appState.player.targetAge || 80;
+      const lifePct = Math.min(100, Math.max(0, Math.round((currentAge / targetAge) * 100)));
+      document.getElementById('time-life-pct').innerText = lifePct + "%";
+      document.getElementById('time-life-bar').style.width = lifePct + "%";
+    }
+
+    function saveSettings() {
+      const name = document.getElementById('setting-player-name').value.trim();
+      const birth = parseInt(document.getElementById('setting-birth-year').value);
+      const target = parseInt(document.getElementById('setting-target-age').value);
+
+      if (name) appState.player.name = name;
+      if (birth) appState.player.birthYear = birth;
+      if (target) appState.player.targetAge = target;
+
+      saveState();
+      toggleModal('settings-modal');
+      updateTopBar();
+      renderActiveView();
+      showToast("系统设置已保存", "⚙️");
+    }
+
+    function exportDataJSON() {
+      const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `life_rpg_shanhai_backup_${Date.now()}.json`;
+      a.click();
+    }
+
+    function importDataJSON(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const data = JSON.parse(event.target.result);
+          if (data && data.player) {
+            appState = data;
+            saveState();
+            applyTheme();
+            updateTopBar();
+            renderActiveView();
+            toggleModal('settings-modal');
+            showToast("数据成功恢复！", "📥");
+          }
+        } catch (err) {}
+      };
+      reader.readAsText(file);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      applyTheme();
+      updateTopBar();
+      renderActiveView();
+
+      document.getElementById('setting-player-name').value = appState.player.name;
+      document.getElementById('setting-birth-year').value = appState.player.birthYear || 2000;
+      document.getElementById('setting-target-age').value = appState.player.targetAge || 80;
+
+      setInterval(updateTimeProgressPillars, 60000);
+    });
+  </script>
+</body>
+</html>
